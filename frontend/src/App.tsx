@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getApiHealth, type HealthResponse } from "./services/api";
+import { DatabaseStatus } from './components/DatabaseStatus';
 import "./App.css";
 
 function App() {
@@ -46,6 +47,8 @@ function App() {
           <p>Timestamp: {data.timestamp}</p>
         </div>
       )}
+      
+      <DatabaseStatus />
     </main>
   );
 }
