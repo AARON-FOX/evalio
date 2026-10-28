@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import { supabase } from "./lib/supabase.js";
 
 const app = express();
 
@@ -18,6 +19,39 @@ app.get("/api/health", (_req, res) => {
     message: "Evalio API is running",
     timestamp: new Date().toISOString(),
   });
+});
+
+app.get("/api/db-health", async (_req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("app_status")
+      .select("name, message")
+      .eq("name", "evalio")
+      .single();
+
+    if (error) {
+      console.error("Supabase error:", error);
+
+      res.status(502).json({
+        status: "error",
+        message: "Database request failed",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      status: "ok",
+      source: "supabase",
+      data,
+    });
+  } catch (error) {
+    console.error("Database connection error:", error);
+
+    res.status(502).json({
+      status: "error",
+      message: "Database connection failed",
+    });
+  }
 });
 
 // Start server
