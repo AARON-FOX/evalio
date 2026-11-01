@@ -42,3 +42,27 @@ export async function getDatabaseHealth(
 
   return (await response.json()) as DatabaseHealthResponse;
 }
+
+export interface CurrentUserResponse {
+  id: string;
+  email: string | null;
+  role: "respondent" | "creator";
+}
+
+export async function getCurrentUser(
+  token: string,
+  signal?: AbortSignal,
+): Promise<CurrentUserResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/me`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    signal,
+  });
+
+  if (!response.ok) {
+    throw new Error(`User API request failed: ${response.status}`);
+  }
+
+  return (await response.json()) as CurrentUserResponse;
+}
