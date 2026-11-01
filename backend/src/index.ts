@@ -2,7 +2,8 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { supabase } from "./lib/supabase.js";
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
+import { testsRouter } from "./routes/tests.js";
 
 const app = express();
 
@@ -55,13 +56,13 @@ app.get("/api/db-health", async (_req, res) => {
   }
 });
 
-app.get('/api/me', async (req, res) => {
+app.get("/api/me", async (req, res) => {
   try {
-    const authorization = req.header('authorization');
+    const authorization = req.header("authorization");
 
-    if (!authorization?.startsWith('Bearer ')) {
+    if (!authorization?.startsWith("Bearer ")) {
       res.status(401).json({
-        message: 'Authentication required',
+        message: "Authentication required",
       });
       return;
     }
@@ -74,7 +75,7 @@ app.get('/api/me', async (req, res) => {
 
     if (authError || !authData.user) {
       res.status(401).json({
-        message: 'Invalid or expired token',
+        message: "Invalid or expired token",
       });
       return;
     }
@@ -96,21 +97,20 @@ app.get('/api/me', async (req, res) => {
           persistSession: false,
           autoRefreshToken: false,
         },
-      }
+      },
     );
 
-    const { data: profile, error: profileError } =
-      await userClient
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
+    const { data: profile, error: profileError } = await userClient
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
 
     if (profileError || !profile) {
-      console.error('Profile error:', profileError);
+      console.error("Profile error:", profileError);
 
       res.status(500).json({
-        message: 'Could not load user profile',
+        message: "Could not load user profile",
       });
       return;
     }
@@ -121,17 +121,29 @@ app.get('/api/me', async (req, res) => {
       role: profile.role,
     });
   } catch (error) {
-    console.error('Authentication error:', error);
+    console.error("Authentication error:", error);
 
     res.status(500).json({
-      message: 'Internal server error',
+      message: "Internal server error",
     });
   }
 });
 
+app.use("/api/tests", testsRouter);
+
+import type { ErrorRequestHandler } from "express";
+
+const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
+  console.error("Unhandled API error:", error);
+
+  res.status(500).json({
+    message: "Internal server error",
+  });
+};
+
+app.use(errorHandler);
 
 // Start server
 app.listen(PORT, () => {
   console.log(`Evalio API: http://localhost:${PORT}`);
 });
-
