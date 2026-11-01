@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { supabase } from "./lib/supabase.js";
+import { createClient } from '@supabase/supabase-js';
 
 const app = express();
 
@@ -54,7 +55,83 @@ app.get("/api/db-health", async (_req, res) => {
   }
 });
 
+app.get('/api/me', async (req, res) => {
+  try {
+    const authorization = req.header('authorization');
+
+    if (!authorization?.startsWith('Bearer ')) {
+      res.status(401).json({
+        message: 'Authentication required',
+      });
+      return;
+    }
+
+    const token = authorization.slice(7).trim();
+
+    // Validate the JWT through Supabase Auth
+    const { data: authData, error: authError } =
+      await supabase.auth.getUser(token);
+
+    if (authError || !authData.user) {
+      res.status(401).json({
+        message: 'Invalid or expired token',
+      });
+      return;
+    }
+
+    const user = authData.user;
+
+    // Run the database query as this user,
+    // so PostgreSQL applies their RLS policies
+    const userClient = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_PUBLISHABLE_KEY!,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+        },
+      }
+    );
+
+    const { data: profile, error: profileError } =
+      await userClient
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+    if (profileError || !profile) {
+      console.error('Profile error:', profileError);
+
+      res.status(500).json({
+        message: 'Could not load user profile',
+      });
+      return;
+    }
+
+    res.status(200).json({
+      id: user.id,
+      email: user.email ?? null,
+      role: profile.role,
+    });
+  } catch (error) {
+    console.error('Authentication error:', error);
+
+    res.status(500).json({
+      message: 'Internal server error',
+    });
+  }
+});
+
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Evalio API: http://localhost:${PORT}`);
 });
+
