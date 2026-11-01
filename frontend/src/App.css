@@ -182,3 +182,24 @@
     border-right-color: var(--border);
   }
 }
+
+/* -------------------------------- */
+
+.auth-demo {
+  max-width: 420px;
+  margin: 32px auto;
+}
+
+.auth-demo form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.auth-demo input {
+  padding: 12px;
+  border: 1px solid #777;
+  border-radius: 6px;
+}
+
