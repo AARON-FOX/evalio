@@ -1,63 +1,60 @@
-import { useEffect, useState } from "react";
-import { getApiHealth, type HealthResponse } from "./services/api";
-import { DatabaseStatus } from './components/DatabaseStatus';
-import "./App.css";
-import { AuthDemo } from "./components/AuthDemo";
-import { TestBuilder } from './components/TestBuilder/TestBuilder';
+import { Navigate, Route, Routes } from "react-router";
+
+import { GuestRoute } from "./routes/GuestRoute";
+import { ProtectedRoute } from "./routes/ProtectedRoute";
+import { RoleRoute } from "./routes/RoleRoute";
+
+import { AppLayout } from "./layouts/AppLayout";
+
+import { AuthPage } from "./pages/AuthPage";
+import { DashboardPage } from "./pages/DashboardPage";
+import { NotFoundPage } from "./pages/NotFoundPage";
+
+import { TestBuilder } from "./components/TestBuilder/TestBuilder";
+
 import { StudentTesting } from "./components/StudentTesting/StudentTesting";
-import { TeacherStatistics } from './components/TeacherStatistics/TeacherStatistics';
+
+import { TeacherStatistics } from "./components/TeacherStatistics/TeacherStatistics";
+
+import "./App.css";
 
 function App() {
-  const [data, setData] = useState<HealthResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    getApiHealth(controller.signal)
-      .then((response) => {
-        setData(response);
-      })
-      .catch((err: unknown) => {
-        if (controller.signal.aborted) return;
-
-        setError(err instanceof Error ? err.message : "Unknown error");
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) {
-          setLoading(false);
-        }
-      });
-
-    return () => controller.abort();
-  }, []);
-
   return (
-    <main>
-      <h1>Evalio</h1>
-      <p>Web platform for tests and surveys</p>
+    <Routes>
+      {/* Default route */}
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-      <h2>Backend connection</h2>
+      {/* Public routes */}
+      <Route element={<GuestRoute />}>
+        <Route path="/login" element={<AuthPage mode="login" />} />
 
-      {loading && <p>Connecting to API...</p>}
+        <Route path="/register" element={<AuthPage mode="register" />} />
+      </Route>
 
-      {error && <p role="alert">Connection error: {error}</p>}
+      {/* Authenticated routes */}
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppLayout />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
 
-      {data && (
-        <div>
-          <p>Status: {data.status}</p>
-          <p>Message: {data.message}</p>
-          <p>Timestamp: {data.timestamp}</p>
-        </div>
-      )}
-      
-      <DatabaseStatus />
-      <AuthDemo />
-      <TestBuilder />
-      <StudentTesting />
-      <TeacherStatistics />
-    </main>
+          {/* Student routes */}
+          <Route element={<RoleRoute allowedRole="respondent" />}>
+            <Route path="/tests" element={<StudentTesting />} />
+
+            <Route path="/tests/:testId" element={<StudentTesting />} />
+          </Route>
+
+          {/* Teacher routes */}
+          <Route element={<RoleRoute allowedRole="creator" />}>
+            <Route path="/teacher/tests" element={<TestBuilder />} />
+
+            <Route path="/teacher/statistics" element={<TeacherStatistics />} />
+          </Route>
+        </Route>
+      </Route>
+
+      {/* Unknown routes */}
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
   );
 }
 
