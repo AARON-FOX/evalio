@@ -1,0 +1,180 @@
+.teacher-statistics {
+  width: 100%;
+  max-width: 1100px;
+  margin: 48px auto;
+  text-align: left;
+}
+
+.ts-header {
+  margin-bottom: 24px;
+}
+
+.ts-header h2 {
+  margin: 0 0 8px;
+  font-size: 30px;
+}
+
+.ts-header p,
+.ts-hint {
+  color: #a4aabb;
+}
+
+.ts-layout {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.ts-sidebar,
+.ts-panel {
+  padding: 24px;
+  border: 1px solid #414653;
+  border-radius: 12px;
+  background: #20232b;
+}
+
+.ts-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ts-sidebar h3,
+.ts-panel h3 {
+  margin-top: 0;
+}
+
+.ts-main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.ts-test {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.ts-test small {
+  color: #a4aabb;
+}
+
+.ts-test.active {
+  border-color: #83b5fa;
+  background: #364b65;
+}
+
+.ts-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.ts-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.ts-metric {
+  padding: 20px;
+  border: 1px solid #414653;
+  border-radius: 10px;
+  background: #292e39;
+}
+
+.ts-metric span {
+  display: block;
+  color: #a4aabb;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.ts-metric strong {
+  font-size: 28px;
+}
+
+.ts-table-wrap {
+  overflow-x: auto;
+}
+
+.ts-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.ts-table th,
+.ts-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #414653;
+}
+
+.ts-table th {
+  color: #a4aabb;
+  font-weight: 500;
+}
+
+.ts-table button {
+  padding: 8px 12px;
+}
+
+.ts-details-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ts-question {
+  padding: 16px 0;
+  border-top: 1px solid #414653;
+}
+
+.ts-question h4 {
+  margin: 0 0 12px;
+}
+
+.ts-correct {
+  color: #6ad49b;
+}
+
+.ts-incorrect {
+  color: #fb9494;
+}
+
+.ts-error {
+  padding: 14px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  background: #562e34;
+  color: #ffdcdf;
+}
+
+@media (max-width: 760px) {
+  .ts-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ts-sidebar,
+  .ts-panel {
+    padding: 16px;
+  }
+
+  .ts-metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ts-details-heading {
+    flex-wrap: wrap;
+  }
+}

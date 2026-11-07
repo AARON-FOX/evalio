@@ -5,6 +5,7 @@ import "./App.css";
 import { AuthDemo } from "./components/AuthDemo";
 import { TestBuilder } from './components/TestBuilder/TestBuilder';
 import { StudentTesting } from "./components/StudentTesting/StudentTesting";
+import { TeacherStatistics } from './components/TeacherStatistics/TeacherStatistics';
 
 function App() {
   const [data, setData] = useState<HealthResponse | null>(null);
@@ -55,6 +56,7 @@ function App() {
       <AuthDemo />
       <TestBuilder />
       <StudentTesting />
+      <TeacherStatistics />
     </main>
   );
 }
