@@ -3,6 +3,7 @@ import { getApiHealth, type HealthResponse } from "./services/api";
 import { DatabaseStatus } from './components/DatabaseStatus';
 import "./App.css";
 import { AuthDemo } from "./components/AuthDemo";
+import { TestBuilder } from './components/TestBuilder/TestBuilder';
 
 function App() {
   const [data, setData] = useState<HealthResponse | null>(null);
@@ -51,6 +52,7 @@ function App() {
       
       <DatabaseStatus />
       <AuthDemo />
+      <TestBuilder />
     </main>
   );
 }
