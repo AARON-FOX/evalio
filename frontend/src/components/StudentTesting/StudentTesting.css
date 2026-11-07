@@ -1,0 +1,151 @@
+.student-testing {
+  width: 100%;
+  max-width: 1100px;
+  margin: 48px auto;
+  text-align: left;
+}
+
+.st-header {
+  margin-bottom: 24px;
+}
+
+.st-header h2 {
+  margin-bottom: 8px;
+  font-size: 30px;
+}
+
+.st-header p,
+.st-hint {
+  color: #a4aabb;
+}
+
+.st-layout {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.st-sidebar,
+.st-panel {
+  padding: 24px;
+  border: 1px solid #414653;
+  border-radius: 12px;
+  background: #20232b;
+}
+
+.st-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.st-sidebar h3,
+.st-panel h3 {
+  margin-top: 0;
+}
+
+.st-sidebar button {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.st-sidebar button.active {
+  border-color: #83b5fa;
+  background: #364b65;
+}
+
+.st-sidebar small {
+  color: #a4aabb;
+}
+
+.st-question {
+  margin: 24px 0;
+  padding-top: 20px;
+  border-top: 1px solid #414653;
+}
+
+.st-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  margin-bottom: 8px;
+  border: 1px solid #414653;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.st-option:has(input:checked) {
+  border-color: #83b5fa;
+  background: #303f54;
+}
+
+.st-option input {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.st-primary {
+  width: 100%;
+  padding: 14px;
+  background: #456cba;
+  color: #fff;
+}
+
+.st-result {
+  margin-top: 24px;
+  padding: 24px;
+  border: 1px solid #4d8265;
+  border-radius: 12px;
+  background: #234337;
+}
+
+.st-score {
+  margin: 12px 0;
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.st-history {
+  margin-top: 24px;
+}
+
+.st-history-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 14px 0;
+  border-bottom: 1px solid #414653;
+}
+
+.st-history-item div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.st-history-item small {
+  color: #a4aabb;
+}
+
+.st-error {
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #562e34;
+  color: #ffdcdf;
+}
+
+@media (max-width: 760px) {
+  .st-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .st-sidebar,
+  .st-panel {
+    padding: 16px;
+  }
+}

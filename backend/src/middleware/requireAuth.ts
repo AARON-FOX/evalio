@@ -63,3 +63,14 @@ export const requireCreator: RequestHandler = (req, res, next) => {
 
   next();
 };
+
+export const requireRespondent: RequestHandler = (req, res, next) => {
+  if (req.authUser?.role !== "respondent") {
+    res.status(403).json({
+      message: "Respondent role required",
+    });
+    return;
+  }
+
+  next();
+};

@@ -4,6 +4,7 @@ import { DatabaseStatus } from './components/DatabaseStatus';
 import "./App.css";
 import { AuthDemo } from "./components/AuthDemo";
 import { TestBuilder } from './components/TestBuilder/TestBuilder';
+import { StudentTesting } from "./components/StudentTesting/StudentTesting";
 
 function App() {
   const [data, setData] = useState<HealthResponse | null>(null);
@@ -53,6 +54,7 @@ function App() {
       <DatabaseStatus />
       <AuthDemo />
       <TestBuilder />
+      <StudentTesting />
     </main>
   );
 }
