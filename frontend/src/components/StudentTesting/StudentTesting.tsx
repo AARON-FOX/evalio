@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
+import { useNavigate, useParams } from "react-router";
+
 import { supabase } from "../../lib/supabase";
 import { getCurrentUser } from "../../services/api";
 
@@ -29,6 +31,9 @@ function errorText(error: unknown) {
 }
 
 export function StudentTesting() {
+  const navigate = useNavigate();
+  const { testId } = useParams<{ testId: string }>();
+
   const [authReady, setAuthReady] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 
@@ -39,7 +44,9 @@ export function StudentTesting() {
   const [tests, setTests] = useState<TestRecord[]>([]);
   const [history, setHistory] = useState<SubmissionHistory[]>([]);
 
-  const [selected, setSelected] = useState<TestDetails | null>(null);
+  const [loadedTest, setSelected] = useState<TestDetails | null>(null);
+
+  const selected = testId && loadedTest?.id === testId ? loadedTest : null;
 
   const [answers, setAnswers] = useState<Answers>({});
   const [result, setResult] = useState<SubmissionResult | null>(null);
@@ -123,25 +130,45 @@ export function StudentTesting() {
     };
   }, [authReady, userId]);
 
-  async function openTest(id: string) {
-    setWorking(true);
-    setError("");
-
-    try {
-      const details = await getTestDetails(id);
-
-      if (details.status !== "published") {
-        throw new Error("Тест ще не опубліковано.");
-      }
-
-      setSelected(details);
-      setAnswers({});
-      setResult(null);
-    } catch (err) {
-      setError(errorText(err));
-    } finally {
-      setWorking(false);
+  useEffect(() => {
+    if (pageState !== "ready" || !testId) {
+      return;
     }
+
+    let active = true;
+
+    async function loadSelectedTest() {
+      try {
+        const details = await getTestDetails(testId!);
+
+        if (!active) return;
+
+        if (details.status !== "published") {
+          throw new Error("Тест ще не опубліковано.");
+        }
+
+        setSelected(details);
+        setAnswers({});
+        setResult(null);
+        setError("");
+      } catch (err) {
+        if (!active) return;
+
+        setError(
+          err instanceof Error ? err.message : "Не вдалося завантажити тест",
+        );
+      }
+    }
+
+    void loadSelectedTest();
+
+    return () => {
+      active = false;
+    };
+  }, [pageState, testId]);
+
+  function openTest(id: string) {
+    navigate(`/tests/${id}`);
   }
 
   function changeAnswer(question: TestQuestion, optionId: string) {
@@ -265,7 +292,7 @@ export function StudentTesting() {
               type="button"
               disabled={working}
               onClick={() => void openTest(test.id)}
-              className={selected?.id === test.id ? "active" : ""}
+              className={testId === test.id ? "active" : ""}
             >
               <strong>{test.title}</strong>
               <small>{test.kind === "test" ? "Тест" : "Опитування"}</small>
@@ -276,7 +303,13 @@ export function StudentTesting() {
         <div className="st-content">
           {!selected && (
             <div className="st-panel">
-              <h3>Вибери тест зі списку</h3>
+              <h3>
+                {testId
+                  ? error
+                    ? "Не вдалося відкрити тест"
+                    : "Завантаження тесту..."
+                  : "Вибери тест зі списку"}
+              </h3>
               <p>Після вибору тут з'являться питання та варіанти відповідей.</p>
             </div>
           )}
@@ -354,7 +387,7 @@ export function StudentTesting() {
                   <button
                     type="button"
                     onClick={() => {
-                      setSelected(null);
+                      navigate("/tests");
                       setAnswers({});
                       setResult(null);
                     }}
