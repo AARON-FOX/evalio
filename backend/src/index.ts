@@ -4,6 +4,7 @@ import cors from "cors";
 import { supabase } from "./lib/supabase.js";
 import { createClient } from "@supabase/supabase-js";
 import { testsRouter } from "./routes/tests.js";
+import { submissionsRouter } from "./routes/submissions.js";
 
 const app = express();
 
@@ -130,6 +131,7 @@ app.get("/api/me", async (req, res) => {
 });
 
 app.use("/api/tests", testsRouter);
+app.use("/api/submissions", submissionsRouter);
 
 import type { ErrorRequestHandler } from "express";
 

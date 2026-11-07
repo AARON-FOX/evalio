@@ -2,7 +2,12 @@ import { Router, type Response } from "express";
 import { z } from "zod";
 
 import { supabaseAdmin } from "../lib/supabaseAdmin.js";
-import { requireAuth, requireCreator } from "../middleware/requireAuth.js";
+import {
+  requireAuth,
+  requireCreator,
+  requireRespondent,
+} from "../middleware/requireAuth.js";
+import { submitTestSchema } from "../schemas/submissionSchemas.js";
 
 import {
   createTestSchema,
@@ -304,4 +309,69 @@ testsRouter.post("/:id/publish", requireCreator, async (req, res) => {
     status: "published",
     message: "Test published successfully",
   });
+});
+
+
+testsRouter.post("/:id/submissions", requireRespondent, async (req, res) => {
+  const idResult = uuidSchema.safeParse(req.params.id);
+  const parsed = submitTestSchema.safeParse(req.body);
+
+  if (!idResult.success || !parsed.success) {
+    res.status(400).json({
+      message: "Invalid submission data",
+      issues: parsed.success ? undefined : parsed.error.issues,
+    });
+    return;
+  }
+
+  const { data, error } = await supabaseAdmin.rpc("evalio_submit_test", {
+    p_test_id: idResult.data,
+    p_respondent_id: req.authUser!.id,
+    p_answers: parsed.data.answers,
+  });
+
+  if (error) {
+    const message = error.message;
+
+    if (message.includes("test_not_published")) {
+      res.status(404).json({
+        message: "Published test not found",
+      });
+      return;
+    }
+
+    if (message.includes("respondent_required")) {
+      res.status(403).json({
+        message: "Respondent role required",
+      });
+      return;
+    }
+
+    if (
+      [
+        "invalid_answers",
+        "invalid_answers_count",
+        "invalid_answer_format",
+        "invalid_question_id",
+        "duplicate_question",
+        "question_not_in_test",
+        "invalid_option_selection",
+        "invalid_option_id",
+      ].some((code) => message.includes(code))
+    ) {
+      res.status(400).json({
+        message,
+      });
+      return;
+    }
+
+    console.error("Submission error:", error);
+
+    res.status(502).json({
+      message: "Could not save test submission",
+    });
+    return;
+  }
+
+  res.status(201).json(data);
 });
