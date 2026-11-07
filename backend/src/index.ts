@@ -5,6 +5,7 @@ import { supabase } from "./lib/supabase.js";
 import { createClient } from "@supabase/supabase-js";
 import { testsRouter } from "./routes/tests.js";
 import { submissionsRouter } from "./routes/submissions.js";
+import { teacherStatisticsRouter } from './routes/teacherStatistics.js';
 
 const app = express();
 
@@ -132,6 +133,7 @@ app.get("/api/me", async (req, res) => {
 
 app.use("/api/tests", testsRouter);
 app.use("/api/submissions", submissionsRouter);
+app.use('/api/teacher', teacherStatisticsRouter);
 
 import type { ErrorRequestHandler } from "express";
 
