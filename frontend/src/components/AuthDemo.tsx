@@ -33,13 +33,15 @@ export function AuthDemo() {
     return () => subscription.unsubscribe();
   }, []);
 
+  const accessToken = session?.access_token;
+
   // Load user profile from Express
   useEffect(() => {
-    if (!session) return;
+    if (!accessToken) return;
 
     const controller = new AbortController();
 
-    getCurrentUser(session.access_token, controller.signal)
+    getCurrentUser(accessToken, controller.signal)
       .then((data) => {
         setProfile(data);
         setError("");
@@ -51,7 +53,7 @@ export function AuthDemo() {
       });
 
     return () => controller.abort();
-  }, [session?.access_token]);
+  }, [accessToken]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
