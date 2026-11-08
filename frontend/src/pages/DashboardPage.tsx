@@ -545,9 +545,13 @@ function StudentDashboard() {
                   <span>{dateText(attempt.submittedAt)}</span>
                 </div>
                 <strong className={styles.recentScore}>
-                  {attempt.score === null || attempt.maxScore === null
+                  {attempt.kind === "survey"
                     ? "Опитування"
-                    : `${attempt.score} / ${attempt.maxScore}`}
+                    : !attempt.resultVisible
+                      ? "Оцінка прихована"
+                      : attempt.score !== null && attempt.maxScore !== null
+                        ? `${attempt.score} / ${attempt.maxScore}`
+                        : "Результат недоступний"}
                 </strong>
               </div>
             ))}

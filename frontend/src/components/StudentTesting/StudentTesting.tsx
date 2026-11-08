@@ -374,12 +374,16 @@ export function StudentTesting() {
                 <div className="st-result" role="status">
                   <h3>Проходження завершено</h3>
 
-                  {result.score !== null && result.maxScore !== null ? (
+                  {result.kind === "survey" ? (
+                    <p>Відповіді на опитування збережено.</p>
+                  ) : result.resultVisible &&
+                    result.score !== null &&
+                    result.maxScore !== null ? (
                     <p className="st-score">
                       {result.score} / {result.maxScore}
                     </p>
                   ) : (
-                    <p>Відповіді на опитування збережено.</p>
+                    <p>Відповіді збережено. Оцінка поки недоступна.</p>
                   )}
 
                   <p>Результат збережений у Supabase.</p>
@@ -423,9 +427,14 @@ export function StudentTesting() {
                   </div>
 
                   <strong>
-                    {submission.score !== null && submission.max_score !== null
-                      ? `${submission.score} / ${submission.max_score}`
-                      : "Опитування"}
+                    {submission.kind === "survey"
+                      ? "Опитування"
+                      : submission.kind === "test" && !submission.result_visible
+                        ? "Оцінка прихована"
+                        : submission.score !== null &&
+                            submission.max_score !== null
+                          ? `${submission.score} / ${submission.max_score}`
+                          : "Результат недоступний"}
                   </strong>
                 </div>
               );

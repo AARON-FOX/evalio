@@ -15,6 +15,8 @@ export interface EditableQuestion {
   text: string;
   question_type: "single_choice" | "multiple_choice";
   position: number;
+  points: number;
+  explanation: string | null;
   options: EditableOption[];
 }
 

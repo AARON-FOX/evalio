@@ -52,6 +52,8 @@ export interface StudentRecentSubmission {
   id: string;
   testId: string;
   testTitle: string;
+  kind: 'test' | 'survey';
+  resultVisible: boolean;
   score: number | null;
   maxScore: number | null;
   submittedAt: string;

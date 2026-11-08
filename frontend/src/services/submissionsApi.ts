@@ -10,6 +10,8 @@ export interface SelectedAnswer {
 export interface SubmissionResult {
   id: string;
   testId: string;
+  kind: 'test' | 'survey';
+  resultVisible: boolean;
   score: number | null;
   maxScore: number | null;
   submittedAt: string;
@@ -18,6 +20,8 @@ export interface SubmissionResult {
 export interface SubmissionHistory {
   id: string;
   test_id: string;
+  kind: 'test' | 'survey' | null;
+  result_visible: boolean;
   score: number | null;
   max_score: number | null;
   submitted_at: string;

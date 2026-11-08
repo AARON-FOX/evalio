@@ -30,6 +30,7 @@ teacherStatisticsRouter.get("/tests", async (req, res) => {
     .from("tests")
     .select("id, title, kind, status, created_at", { count: "exact" })
     .eq("creator_id", req.authUser!.id)
+    .or('status.eq.draft,is_current.eq.true')
     .order("created_at", { ascending: false })
     .range(from, from + pageSize - 1);
 
