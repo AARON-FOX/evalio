@@ -9,11 +9,10 @@ import { AppLayout } from "./layouts/AppLayout";
 import { AuthPage } from "./pages/AuthPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import { UiKitPage } from "./pages/UiKitPage";
 
 import { TestBuilder } from "./components/TestBuilder/TestBuilder";
-
 import { StudentTesting } from "./components/StudentTesting/StudentTesting";
-
 import { TeacherStatistics } from "./components/TeacherStatistics/TeacherStatistics";
 
 import "./App.css";
@@ -49,6 +48,8 @@ function App() {
 
             <Route path="/teacher/statistics" element={<TeacherStatistics />} />
           </Route>
+
+          <Route path="/ui-kit" element={<UiKitPage />} />
         </Route>
       </Route>
 

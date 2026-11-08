@@ -1,0 +1,77 @@
+@use "../../../styles/abstracts/mixins" as m;
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-weight: var(--font-medium);
+}
+
+.required {
+  color: var(--color-error-text);
+}
+
+.input {
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 14px;
+
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+
+  color: var(--color-text-primary);
+  font-size: 14px;
+
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+
+  &::placeholder {
+    color: var(--color-text-secondary);
+    opacity: 0.8;
+  }
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-secondary);
+  }
+
+  &:focus-visible {
+    @include m.focus-ring;
+  }
+
+  &:disabled {
+    background: var(--color-surface-muted);
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+.invalid {
+  border-color: var(--color-error-text);
+}
+
+.hint,
+.error {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.hint {
+  color: var(--color-text-secondary);
+}
+
+.error {
+  color: var(--color-error-text);
+}
