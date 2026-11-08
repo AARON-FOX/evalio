@@ -10,6 +10,7 @@ import { AuthPage } from "./pages/AuthPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { UiKitPage } from "./pages/UiKitPage";
+import { StudentResultsPage } from "./pages/StudentResultsPage";
 
 import { TestBuilder } from "./components/TestBuilder/TestBuilder";
 import { StudentTesting } from "./components/StudentTesting/StudentTesting";
@@ -42,6 +43,8 @@ function App() {
             <Route path="/tests" element={<StudentTesting />} />
 
             <Route path="/tests/:testId" element={<StudentTesting />} />
+
+            <Route path="/results" element={<StudentResultsPage />} />
           </Route>
 
           {/* Teacher routes */}
