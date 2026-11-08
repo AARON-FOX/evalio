@@ -7,6 +7,7 @@ import { testsRouter } from "./routes/tests.js";
 import { submissionsRouter } from "./routes/submissions.js";
 import { teacherStatisticsRouter } from './routes/teacherStatistics.js';
 import { dashboardRouter } from './routes/dashboard.js';
+import { questionEditorRouter } from './routes/questionEditor.js';
 
 const app = express();
 
@@ -136,6 +137,7 @@ app.use("/api/tests", testsRouter);
 app.use("/api/submissions", submissionsRouter);
 app.use('/api/teacher', teacherStatisticsRouter);
 app.use('/api/dashboard', dashboardRouter);
+app.use('/api/tests', questionEditorRouter);
 
 import type { ErrorRequestHandler } from "express";
 
