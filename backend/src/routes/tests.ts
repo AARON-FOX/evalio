@@ -20,7 +20,7 @@ export const testsRouter = Router();
 const uuidSchema = z.string().uuid();
 
 const testFields =
-  "id, creator_id, title, description, kind, status, created_at";
+  "id, creator_id, title, description, kind, status, created_at, is_current, series_id, version_number, subject, class_group, duration_minutes, max_attempts, available_until";
 
 function databaseError(res: Response, error: unknown) {
   console.error("Database error:", error);
@@ -80,7 +80,9 @@ testsRouter.get("/", async (req, res) => {
   const { data, error } = await supabaseAdmin
     .from("tests")
     .select(testFields)
-    .or(`status.eq.published,creator_id.eq.${userId}`)
+    .or(
+      `and(status.eq.published,is_current.eq.true),and(status.eq.draft,creator_id.eq.${userId})`,
+    )
     .order("created_at", { ascending: false })
     .limit(100);
 
@@ -118,7 +120,8 @@ testsRouter.get("/:id", async (req, res) => {
 
   if (
     !test ||
-    (test.status !== "published" && test.creator_id !== req.authUser!.id)
+    (test.creator_id !== req.authUser!.id &&
+      !(test.status === "published" && test.is_current))
   ) {
     res.status(404).json({
       message: "Test not found",
@@ -217,12 +220,14 @@ testsRouter.post("/:id/questions", requireCreator, async (req, res) => {
     return;
   }
 
-  const { data, error } = await supabaseAdmin.rpc("evalio_add_question", {
+  const { data, error } = await supabaseAdmin.rpc("evalio_add_question_v2", {
     p_test_id: idResult.data,
     p_creator_id: req.authUser!.id,
     p_text: parsed.data.text,
     p_question_type: parsed.data.questionType,
     p_options: parsed.data.options,
+    p_points: parsed.data.points,
+    p_explanation: parsed.data.explanation,
   });
 
   if (error) {
@@ -236,6 +241,7 @@ testsRouter.post("/:id/questions", requireCreator, async (req, res) => {
     if (
       [
         "invalid_question",
+        "invalid_question_metadata",
         "invalid_options",
         "invalid_options_count",
         "invalid_correct_answers",
@@ -292,6 +298,8 @@ testsRouter.post("/:id/publish", requireCreator, async (req, res) => {
         "test_already_published",
         "test_has_no_questions",
         "test_has_invalid_questions",
+        "draft_not_editable",
+        "invalid_questions_count",
       ].includes(error.message)
     ) {
       res.status(409).json({
@@ -311,7 +319,9 @@ testsRouter.post("/:id/publish", requireCreator, async (req, res) => {
   });
 });
 
-
+// ===========================================
+// POST /api/tests/:id/submissions
+// ===========================================
 testsRouter.post("/:id/submissions", requireRespondent, async (req, res) => {
   const idResult = uuidSchema.safeParse(req.params.id);
   const parsed = submitTestSchema.safeParse(req.body);
@@ -343,6 +353,17 @@ testsRouter.post("/:id/submissions", requireRespondent, async (req, res) => {
     if (message.includes("respondent_required")) {
       res.status(403).json({
         message: "Respondent role required",
+      });
+      return;
+    }
+
+    if (
+      ["attempt_limit_reached", "test_deadline_passed"].some((code) =>
+        message.includes(code),
+      )
+    ) {
+      res.status(409).json({
+        message,
       });
       return;
     }

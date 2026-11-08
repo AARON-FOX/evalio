@@ -15,7 +15,7 @@ function reportDbError(res: Response, error: unknown) {
   res.status(502).json({ message: "Question editor request failed" });
 }
 
-// Map explicit SQL business exceptions to stable client statuses
+// Map explicit SQL business exceptions to stable client statuses.
 function reportEditError(res: Response, error: { message: string }): boolean {
   const code = error.message;
   if (
@@ -37,6 +37,7 @@ function reportEditError(res: Response, error: { message: string }): boolean {
       "invalid_option",
       "invalid_correct_answers",
       "survey_has_correct_answers",
+      "invalid_question_metadata",
     ].some((name) => code.includes(name))
   ) {
     res.status(400).json({ message: code });
@@ -46,7 +47,7 @@ function reportEditError(res: Response, error: { message: string }): boolean {
 }
 
 // GET /api/tests/:id/editor
-// Intentionally returns correct-answer indicators only to the draft OWNER
+// Intentionally returns correct-answer indicators only to the draft OWNER.
 questionEditorRouter.get("/:id/editor", async (req, res) => {
   const id = uuid.safeParse(req.params.id);
   if (!id.success) {
@@ -56,7 +57,9 @@ questionEditorRouter.get("/:id/editor", async (req, res) => {
 
   const { data: test, error: testError } = await supabaseAdmin
     .from("tests")
-    .select("id, creator_id, title, description, kind, status, created_at")
+    .select(
+      "id, creator_id, series_id, version_number, title, description, kind, status, created_at, subject, class_group, duration_minutes, max_attempts, available_until, show_result_immediately, show_correct_answers, shuffle_questions",
+    )
     .eq("id", id.data)
     .eq("creator_id", req.authUser!.id)
     .eq("status", "draft")
@@ -73,7 +76,7 @@ questionEditorRouter.get("/:id/editor", async (req, res) => {
 
   const { data: questions, error: questionsError } = await supabaseAdmin
     .from("questions")
-    .select("id, text, question_type, position")
+    .select("id, text, question_type, position, points, explanation")
     .eq("test_id", test.id)
     .order("position", { ascending: true });
   if (questionsError) {
@@ -140,13 +143,15 @@ questionEditorRouter.patch("/:id/questions/:questionId", async (req, res) => {
     return;
   }
 
-  const { data, error } = await supabaseAdmin.rpc("evalio_update_question", {
+  const { data, error } = await supabaseAdmin.rpc("evalio_update_question_v2", {
     p_test_id: testId.data,
     p_creator_id: req.authUser!.id,
     p_question_id: questionId.data,
     p_text: input.data.text,
     p_question_type: input.data.questionType,
     p_options: input.data.options,
+    p_points: input.data.points,
+    p_explanation: input.data.explanation,
   });
 
   if (error) {

@@ -19,9 +19,7 @@ export const updateTestSchema = z
 
 export const addQuestionSchema = z.strictObject({
   text: z.string().trim().min(1).max(5000),
-
   questionType: z.enum(["single_choice", "multiple_choice"]),
-
   options: z
     .array(
       z.strictObject({
@@ -31,4 +29,12 @@ export const addQuestionSchema = z.strictObject({
     )
     .min(2)
     .max(12),
+  points: z.number().int().min(1).max(100).default(1),
+  explanation: z
+    .string()
+    .trim()
+    .max(2000)
+    .nullable()
+    .optional()
+    .transform((value) => value ?? null),
 });

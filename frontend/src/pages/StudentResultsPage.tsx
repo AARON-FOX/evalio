@@ -74,9 +74,13 @@ export function StudentResultsPage() {
                 </span>
               </div>
               <strong className={styles.result}>
-                {item.score === null || item.max_score === null
+                {item.kind === "survey"
                   ? "Опитування"
-                  : `${item.score} / ${item.max_score}`}
+                  : item.kind === "test" && !item.result_visible
+                    ? "Оцінка прихована"
+                    : item.score !== null && item.max_score !== null
+                      ? `${item.score} / ${item.max_score}`
+                      : "Результат недоступний"}
               </strong>
             </div>
           ))}
