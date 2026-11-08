@@ -1,0 +1,331 @@
+@use "../styles/abstracts/mixins" as m;
+
+.shell {
+  min-height: 100dvh;
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+.header,
+.footer {
+  width: min(1320px, calc(100% - 96px));
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header {
+  padding-top: 28px;
+}
+.footer {
+  margin-top: auto;
+  padding-block: 36px 46px;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--color-primary);
+  font-size: 24px;
+  font-weight: var(--font-bold);
+  letter-spacing: -0.035em;
+}
+
+.brandMark {
+  display: grid;
+  place-items: center;
+  width: 31px;
+  height: 31px;
+  border-radius: 8px;
+  background: var(--color-primary);
+  color: white;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.headerHelp {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  color: var(--color-secondary);
+  font-size: 14px;
+}
+
+.main {
+  width: min(1120px, calc(100% - 64px));
+  margin: clamp(80px, 9vh, 120px) auto 64px;
+  display: grid;
+  grid-template-columns: minmax(0, 440px) minmax(0, 580px);
+  align-items: center;
+  gap: clamp(50px, 6vw, 100px);
+}
+
+.formSection {
+  min-width: 0;
+}
+.eyebrow,
+.infoEyebrow {
+  font-size: 12px;
+  font-weight: var(--font-medium);
+  letter-spacing: 0.035em;
+  color: var(--color-secondary);
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+}
+.formSection h1 {
+  margin: 0 0 10px;
+  color: var(--color-text-primary);
+  font-size: clamp(26px, 2.5vw, 32px);
+  font-weight: var(--font-bold);
+  letter-spacing: -0.03em;
+}
+.subtitle {
+  margin: 0 0 30px;
+  color: var(--color-text-secondary);
+  font-size: 15px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 19px;
+}
+
+.form :global(input:not([type="checkbox"])) {
+  min-height: 48px;
+  border-radius: var(--radius-sm);
+}
+
+.form :global(button[type="submit"]) {
+  margin-top: 6px;
+  min-height: 49px;
+  display: flex;
+  gap: 10px;
+}
+
+.passwordField {
+  display: grid;
+  gap: 7px;
+}
+.fieldLabel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: var(--font-medium);
+}
+.fieldLabel > span[aria-hidden="true"] {
+  color: var(--color-error-text);
+}
+.passwordControl {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  overflow: hidden;
+  &:focus-within {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+  }
+  input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: var(--color-text-primary);
+    padding: 11px 14px;
+    font: inherit;
+  }
+}
+.passwordToggle {
+  flex: 0 0 44px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--color-secondary);
+  cursor: pointer;
+  &:focus-visible {
+    @include m.focus-ring;
+  }
+}
+
+.formExtra {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  a {
+    color: var(--color-secondary);
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+}
+.checkboxLabel,
+.terms {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1.55;
+  input {
+    margin: 2px 0 0;
+    width: 17px;
+    height: 17px;
+    accent-color: var(--color-primary);
+    flex-shrink: 0;
+  }
+}
+.hint {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  margin: 0;
+}
+.switch {
+  text-align: center;
+  margin: 25px 0 0;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  a {
+    margin-left: 4px;
+    color: var(--color-secondary);
+    font-weight: var(--font-medium);
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+.roleNote {
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  margin: 21px 0 0;
+}
+
+.infoPanel {
+  background: #efecf5;
+  border-radius: 16px;
+  padding: clamp(26px, 3vw, 38px);
+  min-width: 0;
+}
+.infoEyebrow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 0 0 29px;
+}
+.infoPanel h2 {
+  color: var(--color-text-primary);
+  font-size: clamp(25px, 2.5vw, 32px);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+  margin: 0 0 28px;
+}
+.features {
+  display: grid;
+  gap: 22px;
+}
+.feature {
+  display: flex;
+  gap: 13px;
+  align-items: flex-start;
+  h3 {
+    margin: 0 0 5px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+}
+.featureIcon {
+  display: flex;
+  color: var(--color-secondary);
+  margin-top: 1px;
+}
+.panelNote {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 25px;
+  padding-top: 22px;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+  svg {
+    flex-shrink: 0;
+    color: var(--color-secondary);
+  }
+}
+
+@include m.tablet {
+  .main {
+    gap: 32px;
+  }
+}
+
+@include m.mobile {
+  .header,
+  .footer {
+    width: calc(100% - 36px);
+  }
+  .header {
+    padding-top: 19px;
+  }
+  .brand {
+    font-size: 22px;
+  }
+  .brandMark {
+    width: 29px;
+    height: 29px;
+  }
+  .headerHelp {
+    font-size: 12px;
+  }
+  .main {
+    width: calc(100% - 36px);
+    grid-template-columns: minmax(0, 1fr);
+    gap: 43px;
+    margin: 43px auto 32px;
+  }
+  .formSection h1 {
+    font-size: 29px;
+  }
+  .subtitle {
+    margin-bottom: 25px;
+  }
+  .infoPanel {
+    padding: 24px;
+  }
+  .infoPanel h2 {
+    font-size: 27px;
+  }
+  .footer {
+    padding: 28px 0;
+  }
+}
