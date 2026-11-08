@@ -1,0 +1,71 @@
+:root {
+  color-scheme: light;
+
+  // Brand colors
+  --color-primary: #352f44;
+  --color-secondary: #5c5470;
+  --color-accent: #b9b4c7;
+
+  // Backgrounds
+  --color-background: #faf0e6;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f5f2f8;
+
+  // Typography
+  --color-text-primary: #282533;
+  --color-text-secondary: #686677;
+  --color-text-inverse: #ffffff;
+
+  // Semantic colors
+  --color-success: #66bb6a;
+  --color-success-text: #2e7d32;
+  --color-success-bg: #eaf7ec;
+
+  --color-error: #e2b4bd;
+  --color-error-text: #a13f54;
+  --color-error-bg: #f9e8ec;
+
+  --color-info-bg: #eeeaf5;
+
+  // Borders and focus
+  --color-border: #ded9e6;
+  --color-border-strong: #b9b4c7;
+  --color-focus: #5c5470;
+
+  // Font
+  --font-family: "Inter", Arial, sans-serif;
+
+  --font-regular: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  // Spacing scale (4px grid)
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  // Radius
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  // Shadow
+  --shadow-card: 0 4px 20px rgba(53, 47, 68, 0.07);
+
+  --shadow-hover: 0 8px 24px rgba(53, 47, 68, 0.12);
+
+  // Layout
+  --container-width: 1200px;
+
+  // Animation
+  --transition-fast: 150ms ease;
+  --transition-normal: 220ms ease;
+}

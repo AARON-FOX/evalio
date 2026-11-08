@@ -1,0 +1,39 @@
+// Visible keyboard focus
+@mixin focus-ring {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+// Tablet and smaller
+@mixin tablet {
+  @media (max-width: 1024px) {
+    @content;
+  }
+}
+
+// Mobile
+@mixin mobile {
+  @media (max-width: 767px) {
+    @content;
+  }
+}
+
+// Text truncation
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Visually hidden, available to screen readers
+@mixin visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

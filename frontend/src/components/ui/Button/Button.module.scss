@@ -1,0 +1,99 @@
+@use "../../../styles/abstracts/mixins" as m;
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+
+  font-family: var(--font-family);
+  font-weight: var(--font-medium);
+  line-height: 1.25;
+
+  cursor: pointer;
+
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+
+  &:focus-visible {
+    @include m.focus-ring;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.primary {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+
+  &:hover:not(:disabled) {
+    background: var(--color-secondary);
+  }
+}
+
+.secondary {
+  background: var(--color-accent);
+  color: var(--color-primary);
+
+  &:hover:not(:disabled) {
+    background: #a9a3b9;
+  }
+}
+
+.outline {
+  background: transparent;
+  border-color: var(--color-secondary);
+  color: var(--color-primary);
+
+  &:hover:not(:disabled) {
+    background: var(--color-surface-muted);
+  }
+}
+
+.ghost {
+  background: transparent;
+  color: var(--color-primary);
+
+  &:hover:not(:disabled) {
+    background: var(--color-surface-muted);
+  }
+}
+
+.danger {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+
+  &:hover:not(:disabled) {
+    background: var(--color-error);
+  }
+}
+
+.sm {
+  min-height: 36px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.md {
+  min-height: 44px;
+  padding: 10px 18px;
+  font-size: 14px;
+}
+
+.lg {
+  min-height: 48px;
+  padding: 12px 24px;
+  font-size: 16px;
+}
+
+.fullWidth {
+  width: 100%;
+}

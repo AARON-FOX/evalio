@@ -1,0 +1,48 @@
+body {
+  font-family: var(--font-family);
+  font-size: 16px;
+  font-weight: var(--font-regular);
+  line-height: 1.5;
+
+  color: var(--color-text-primary);
+  background: var(--color-background);
+
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--color-text-primary);
+  line-height: 1.25;
+}
+
+h1 {
+  font-size: 32px;
+  font-weight: var(--font-bold);
+}
+
+h2 {
+  font-size: 24px;
+  font-weight: var(--font-semibold);
+}
+
+h3 {
+  font-size: 20px;
+  font-weight: var(--font-semibold);
+}
+
+h4,
+h5,
+h6 {
+  font-size: 16px;
+  font-weight: var(--font-semibold);
+}
+
+p {
+  line-height: 1.6;
+}
