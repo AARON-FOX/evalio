@@ -28,6 +28,8 @@ function App() {
         <Route path="/login" element={<AuthPage mode="login" />} />
 
         <Route path="/register" element={<AuthPage mode="register" />} />
+
+        <Route path="/forgot-password" element={<AuthPage mode="forgot" />} />
       </Route>
 
       {/* Authenticated routes */}
@@ -52,6 +54,8 @@ function App() {
           <Route path="/ui-kit" element={<UiKitPage />} />
         </Route>
       </Route>
+
+      <Route path="/reset-password" element={<AuthPage mode="reset" />} />
 
       {/* Unknown routes */}
       <Route path="*" element={<NotFoundPage />} />
