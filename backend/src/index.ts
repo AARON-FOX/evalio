@@ -6,6 +6,7 @@ import { createClient } from "@supabase/supabase-js";
 import { testsRouter } from "./routes/tests.js";
 import { submissionsRouter } from "./routes/submissions.js";
 import { teacherStatisticsRouter } from './routes/teacherStatistics.js';
+import { dashboardRouter } from './routes/dashboard.js';
 
 const app = express();
 
@@ -134,6 +135,7 @@ app.get("/api/me", async (req, res) => {
 app.use("/api/tests", testsRouter);
 app.use("/api/submissions", submissionsRouter);
 app.use('/api/teacher', teacherStatisticsRouter);
+app.use('/api/dashboard', dashboardRouter);
 
 import type { ErrorRequestHandler } from "express";
 
