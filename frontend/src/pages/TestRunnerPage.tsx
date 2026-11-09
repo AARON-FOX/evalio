@@ -205,9 +205,13 @@ export function TestRunnerPage() {
               Час завершився. Сервер автоматично зафіксував наявні відповіді.
             </p>
           )}
-          <Link to="/results" className={styles.resultLink}>
-            Мої результати
+          <Link to={`/results/${result.id}`} className={styles.resultLink}>
+            Переглянути результат
           </Link>
+          <Link to="/results" className={styles.backLink}>
+            Усі результати
+          </Link>
+
           <Link to="/dashboard" className={styles.backLink}>
             До кабінету
           </Link>

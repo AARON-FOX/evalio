@@ -11,6 +11,7 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { UiKitPage } from "./pages/UiKitPage";
 import { StudentResultsPage } from "./pages/StudentResultsPage";
+import { SubmissionResultPage } from './pages/SubmissionResultPage';
 import { TeacherTestsPage } from "./pages/TeacherTestsPage";
 import { TestEditorPage } from "./pages/TestEditorPage";
 import { StudentTestsPage } from "./pages/StudentTestsPage";
@@ -42,7 +43,9 @@ function App() {
           {/* Student routes */}
           <Route element={<RoleRoute allowedRole="respondent" />}>
             <Route path="/tests" element={<StudentTestsPage />} />
+            
             <Route path="/results" element={<StudentResultsPage />} />
+            <Route path="/results/:submissionId" element={<SubmissionResultPage />} />
           </Route>
 
           {/* Teacher routes */}
