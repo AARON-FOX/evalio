@@ -1,0 +1,53 @@
+.page {
+  display: grid;
+  gap: 20px;
+}
+.heading {
+  > p {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--color-secondary);
+  }
+  h1 {
+    font-size: 32px;
+    margin: 0 0 9px;
+  }
+  span {
+    color: var(--color-text-secondary);
+  }
+}
+.list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 18px;
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 22px;
+  }
+  h2 {
+    font-size: 20px;
+    margin: 0 0 6px;
+  }
+  p {
+    color: var(--color-text-secondary);
+    font-size: 14px;
+  }
+  small {
+    color: var(--color-secondary);
+  }
+}
+
+.open {
+  margin-top: auto;
+  display: block;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+}
