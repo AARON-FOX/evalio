@@ -1,0 +1,458 @@
+.page {
+  width: 100%;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding-bottom: var(--space-8);
+  color: var(--color-text-primary);
+}
+
+.loading {
+  margin: var(--space-8) 0;
+  color: var(--color-text-secondary);
+}
+
+.backLink,
+.headingLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: max-content;
+  color: var(--color-secondary);
+  font-size: 13px;
+  text-decoration: none;
+  &:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+  }
+  &:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 4px;
+  }
+}
+
+.heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+  margin: 18px 0 24px;
+
+  h1 {
+    margin: 6px 0;
+    font-size: 30px;
+    font-weight: var(--font-bold);
+  }
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 11px;
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.09em;
+  color: var(--color-secondary);
+}
+.meta,
+.dateLine {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+.meta {
+  margin: 0;
+}
+.headingLink {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  padding: 10px 14px;
+}
+
+.hero {
+  padding: 24px 28px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+.heroMain {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding-bottom: 26px;
+  border-bottom: 1px solid var(--color-border);
+}
+.scoreRing,
+.hiddenRing {
+  flex: 0 0 150px;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+.scoreRing {
+  background: conic-gradient(
+    var(--color-primary) 0 var(--score-progress),
+    var(--color-border) var(--score-progress) 100%
+  );
+}
+.scoreRingInner {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  width: 123px;
+  height: 123px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  strong {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.15;
+  }
+  small {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+  }
+}
+.hiddenRing {
+  background: var(--color-surface-muted);
+  color: var(--color-secondary);
+}
+.heroText {
+  display: grid;
+  align-content: center;
+  gap: var(--space-2);
+  min-width: 0;
+  h2 {
+    font-size: 23px;
+    font-weight: var(--font-bold);
+    margin: 0;
+  }
+  p {
+    margin: 0;
+    line-height: 1.55;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+  }
+}
+.completedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  justify-self: start;
+  padding: 5px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+  font-size: 12px;
+  font-weight: var(--font-semibold);
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding-top: 22px;
+  > div {
+    display: grid;
+    gap: 6px;
+  }
+  strong {
+    font-size: 23px;
+    font-weight: 700;
+  }
+  span {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+  }
+}
+.positive {
+  color: var(--color-success-text);
+}
+.negative {
+  color: var(--color-error-text);
+}
+.metricsNote {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin: 12px 0 0;
+}
+
+.sectionTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 26px 0 14px;
+  h2 {
+    margin: 0;
+    font-size: 20px;
+  }
+  span {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+  }
+}
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(230px, 0.8fr);
+  align-items: start;
+  gap: 18px;
+}
+.reviewList,
+.sideColumn {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.reviewCard,
+.sideCard {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-card);
+}
+.reviewCard h3 {
+  margin: 12px 0 14px;
+  line-height: 1.35;
+  font-size: 17px;
+  font-weight: var(--font-semibold);
+  overflow-wrap: anywhere;
+}
+.questionTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.state {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 9px;
+  font-size: 12px;
+  border-radius: var(--radius-pill);
+  font-weight: var(--font-medium);
+}
+.stateCorrect {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+.stateIncorrect {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+.stateSkipped {
+  background: var(--color-surface-muted);
+  color: var(--color-secondary);
+}
+.earnedPoints {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+.answerBox {
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  margin: 9px 0;
+  p {
+    margin: 5px 0 0;
+    line-height: 1.45;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+  }
+}
+.answerLabel {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.04em;
+}
+.answerCorrect {
+  background: var(--color-success-bg);
+  .answerLabel {
+    color: var(--color-success-text);
+  }
+}
+.answerWrong {
+  background: var(--color-error-bg);
+  .answerLabel {
+    color: var(--color-error-text);
+  }
+}
+.answerEmpty {
+  background: var(--color-surface-muted);
+  .answerLabel {
+    color: var(--color-secondary);
+  }
+}
+.explanation {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin: 14px 0 0;
+  overflow-wrap: anywhere;
+}
+.sideCard {
+  display: grid;
+  gap: 10px;
+  h3 {
+    font-size: 17px;
+    margin: 0;
+  }
+  strong {
+    font-size: 14px;
+  }
+  p {
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+}
+.sideCard > svg {
+  color: var(--color-secondary);
+}
+.sideInfo {
+  background: var(--color-info-bg);
+  border-color: transparent;
+}
+.notAvailable {
+  display: flex;
+  align-items: start;
+  gap: 14px;
+  padding: 20px 24px;
+  margin-top: 24px;
+  > svg {
+    flex-shrink: 0;
+    color: var(--color-secondary);
+  }
+  h2 {
+    margin: 0 0 6px;
+    font-size: 18px;
+  }
+  p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+  }
+}
+
+.tip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  margin: 20px 0;
+  border-radius: var(--radius-sm);
+  background: var(--color-info-bg);
+  color: var(--color-secondary);
+  font-size: 13px;
+}
+
+.tip svg {
+  flex-shrink: 0;
+}
+
+.primaryLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-weight: var(--font-medium);
+  font-size: 14px;
+
+  padding: 12px 18px;
+  margin-top: 12px;
+
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+
+  &:hover {
+    background: var(--color-secondary);
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr) 260px;
+  }
+}
+@media (max-width: 767px) {
+  .page {
+    padding-bottom: 16px;
+  }
+  .heading {
+    flex-direction: column;
+    align-items: start;
+    gap: 14px;
+    margin: 18px 0;
+    h1 {
+      font-size: 25px;
+    }
+  }
+  .headingLink {
+    width: 100%;
+    justify-content: center;
+  }
+  .hero {
+    padding: 20px 15px;
+  }
+  .heroMain {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+  }
+  .heroText {
+    justify-items: center;
+    h2 {
+      font-size: 21px;
+    }
+  }
+  .scoreRing,
+  .hiddenRing {
+    width: 130px;
+    height: 130px;
+    flex-basis: 130px;
+  }
+  .scoreRingInner {
+    width: 107px;
+    height: 107px;
+    strong {
+      font-size: 23px;
+    }
+  }
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 12px;
+  }
+  .sectionTitle h2 {
+    font-size: 19px;
+  }
+  .columns {
+    grid-template-columns: 1fr;
+  }
+  .reviewCard,
+  .sideCard {
+    padding: 16px 14px;
+  }
+  .reviewCard h3 {
+    font-size: 16px;
+  }
+  .primaryLink {
+    width: 100%;
+  }
+  .notAvailable {
+    padding: 16px;
+  }
+}
