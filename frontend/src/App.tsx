@@ -11,8 +11,10 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { UiKitPage } from "./pages/UiKitPage";
 import { StudentResultsPage } from "./pages/StudentResultsPage";
+import { TeacherTestsPage } from "./pages/TeacherTestsPage";
+import { TestEditorPage } from "./pages/TestEditorPage";
 
-import { TestBuilder } from "./components/TestBuilder/TestBuilder";
+// import { TestBuilder } from "./components/TestBuilder/TestBuilder";
 import { StudentTesting } from "./components/StudentTesting/StudentTesting";
 import { TeacherStatistics } from "./components/TeacherStatistics/TeacherStatistics";
 
@@ -49,7 +51,13 @@ function App() {
 
           {/* Teacher routes */}
           <Route element={<RoleRoute allowedRole="creator" />}>
-            <Route path="/teacher/tests" element={<TestBuilder />} />
+            <Route path="/teacher/tests" element={<TeacherTestsPage />} />
+            <Route path="/teacher/tests/new" element={<TestEditorPage />} />
+            
+            <Route
+              path="/teacher/tests/:testId/edit"
+              element={<TestEditorPage />}
+            />
 
             <Route path="/teacher/statistics" element={<TeacherStatistics />} />
           </Route>

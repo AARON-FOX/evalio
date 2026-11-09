@@ -156,7 +156,7 @@ function TeacherDashboard() {
             Ваші тести та результати студентів — в одному місці.
           </p>
         </div>
-        <Link to="/teacher/tests" className={styles.primaryLink}>
+        <Link to="/teacher/tests/new" className={styles.primaryLink}>
           <FilePlus2 size={18} aria-hidden="true" /> Створити тест
         </Link>
       </div>
@@ -286,7 +286,7 @@ function TeacherDashboard() {
                         </td>
                         <td>
                           <Link
-                            to="/teacher/tests"
+                            to={`/teacher/tests/${test.id}/edit`}
                             className={styles.outlineLink}
                           >
                             Відкрити
