@@ -9,6 +9,8 @@ import { teacherStatisticsRouter } from './routes/teacherStatistics.js';
 import { dashboardRouter } from './routes/dashboard.js';
 import { questionEditorRouter } from './routes/questionEditor.js';
 import { testVersionSettingsRouter } from './routes/testVersionSettings.js';
+import { activeAttemptsRouter } from './routes/activeAttempts.js';
+import { legacySubmissionGuard } from './routes/legacySubmissionGuard.js';
 
 const app = express();
 
@@ -134,7 +136,10 @@ app.get("/api/me", async (req, res) => {
   }
 });
 
+app.use('/api/tests', legacySubmissionGuard);
+
 app.use("/api/tests", testsRouter);
+app.use('/api/attempts', activeAttemptsRouter);
 app.use("/api/submissions", submissionsRouter);
 app.use('/api/teacher', teacherStatisticsRouter);
 app.use('/api/dashboard', dashboardRouter);
