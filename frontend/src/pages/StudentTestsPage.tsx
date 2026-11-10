@@ -55,7 +55,9 @@ export function StudentTestsPage() {
               <ClipboardList size={20} aria-hidden="true" />
               <div>
                 <h2>{test.title}</h2>
-                {test.description && <p>{test.description}</p>}
+                {test.description && (
+                  <p className={styles.testDescription}>{test.description}</p>
+                )}
                 <small>
                   {[test.subject, test.class_group].filter(Boolean).join(" · ")}
                 </small>

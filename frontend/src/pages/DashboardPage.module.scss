@@ -305,6 +305,7 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
+  align-items: start;
 }
 .assignedCard {
   display: flex;
@@ -349,6 +350,13 @@
   color: var(--color-text-secondary);
   font-size: 13px;
   line-height: 1.5;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  max-height: 4.5em;
 }
 .assignedMeta {
   display: grid;

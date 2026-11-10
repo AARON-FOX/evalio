@@ -52,6 +52,8 @@ import type {
   EditableTest,
 } from "../services/questionEditorApi";
 
+import { ConfirmDialog } from "../components/ui/ConfirmDialog/ConfirmDialog";
+
 import styles from "./TestEditorPage.module.scss";
 
 type ChoiceKind = "single_choice" | "multiple_choice";
@@ -391,6 +393,7 @@ function ExistingTestEditor({ testId }: { testId: string }) {
   );
   const [questionDirty, setQuestionDirty] = useState(false);
   const [preview, setPreview] = useState(false);
+  const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -425,15 +428,21 @@ function ExistingTestEditor({ testId }: { testId: string }) {
     };
   }, [testId]);
 
-  async function refreshEditor(focusId?: string | null) {
+  async function refreshEditor(
+    focusId?: string | null,
+    preserveMetadata = false,
+  ) {
     const [editor, settings, versions] = await Promise.all([
       getEditableTest(testId),
       getTestSettings(testId),
       getVersions(testId),
     ]);
     setLoaded({ settings, versions, editor, published: null });
-    setMetadata(metadataFromSettings(settings));
-    setMetadataDirty(false);
+    // Question-only actions must not overwrite unsaved fields in the settings panel.
+    if (!preserveMetadata) {
+      setMetadata(metadataFromSettings(settings));
+      setMetadataDirty(false);
+    }
     const preferred = focusId === undefined ? selectedQuestionId : focusId;
     const selected =
       editor.questions.find((item) => item.id === preferred) ??
@@ -505,7 +514,7 @@ function ExistingTestEditor({ testId }: { testId: string }) {
         const created = await addWeightedQuestion(testId, payload);
         id = created.id;
       }
-      await refreshEditor(id);
+      await refreshEditor(id, true);
       setNotice("Питання збережено.");
     } catch (err) {
       setActionError(errorText(err));
@@ -568,7 +577,7 @@ function ExistingTestEditor({ testId }: { testId: string }) {
         testId,
         questionPayload(copy, loaded.settings.kind),
       );
-      await refreshEditor(added.id);
+      await refreshEditor(added.id, true);
       setNotice("Питання дубльовано.");
     } catch (err) {
       setActionError(errorText(err));
@@ -588,13 +597,27 @@ function ExistingTestEditor({ testId }: { testId: string }) {
     setNotice("");
     try {
       await deleteDraftQuestion(testId, selectedQuestionId);
-      await refreshEditor(null);
+      await refreshEditor(null, true);
       setNotice("Питання видалено з чернетки.");
     } catch (err) {
       setActionError(errorText(err));
     } finally {
       setBusy(false);
     }
+  }
+
+  function requestPublish() {
+    if (!loaded?.editor || busy) return;
+    if (metadataDirty || questionDirty) {
+      setActionError("Спочатку збережи зміни чернетки й питання.");
+      return;
+    }
+    if (loaded.editor.questions.length === 0) {
+      setActionError("Перед публікацією додай хоча б одне питання.");
+      return;
+    }
+    setActionError("");
+    setPublishConfirmOpen(true);
   }
 
   async function handlePublish() {
@@ -607,12 +630,6 @@ function ExistingTestEditor({ testId }: { testId: string }) {
       setActionError("Перед публікацією додай хоча б одне питання.");
       return;
     }
-    if (
-      !window.confirm(
-        "Опублікувати цю версію тесту? Після публікації її питання змінювати не можна.",
-      )
-    )
-      return;
     setBusy(true);
     setActionError("");
     try {
@@ -627,7 +644,9 @@ function ExistingTestEditor({ testId }: { testId: string }) {
       setMetadataDirty(false);
       setQuestionDirty(false);
       setNotice("Версію тесту опубліковано.");
+      setPublishConfirmOpen(false);
     } catch (err) {
+      setPublishConfirmOpen(false);
       setActionError(errorText(err));
     } finally {
       setBusy(false);
@@ -1244,10 +1263,7 @@ function ExistingTestEditor({ testId }: { testId: string }) {
               >
                 Зберегти чернетку
               </Button>
-              <Button
-                disabled={busy || count === 0}
-                onClick={() => void handlePublish()}
-              >
+              <Button disabled={busy || count === 0} onClick={requestPublish}>
                 <Send size={17} />{" "}
                 {loaded.settings.version_number === 1
                   ? "Опублікувати тест"
@@ -1262,6 +1278,23 @@ function ExistingTestEditor({ testId }: { testId: string }) {
           </p>
         </>
       )}
+      <ConfirmDialog
+        open={publishConfirmOpen}
+        busy={busy}
+        title={
+          loaded.settings.version_number === 1
+            ? "Опублікувати тест?"
+            : "Опублікувати нову версію?"
+        }
+        description="Після публікації питання цієї версії змінювати неможливо. Для подальших змін знадобиться нова чернетка версії."
+        confirmLabel={
+          loaded.settings.version_number === 1
+            ? "Опублікувати тест"
+            : "Опублікувати зміни"
+        }
+        onCancel={() => setPublishConfirmOpen(false)}
+        onConfirm={() => void handlePublish()}
+      />
     </section>
   );
 }
