@@ -1,180 +1,224 @@
 .teacher-statistics {
   width: 100%;
-  max-width: 1100px;
-  margin: 48px auto;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0;
+  color: var(--color-text-primary);
   text-align: left;
 }
-
-.ts-header {
-  margin-bottom: 24px;
+.teacher-statistics .ts-header {
+  margin: 0 0 24px;
 }
-
-.ts-header h2 {
+.teacher-statistics .ts-header h2 {
   margin: 0 0 8px;
-  font-size: 30px;
+  font-size: clamp(24px, 2.4vw, 32px);
+  line-height: 1.25;
+  color: var(--color-text-primary);
 }
-
-.ts-header p,
-.ts-hint {
-  color: #a4aabb;
+.teacher-statistics .ts-header p,
+.teacher-statistics .ts-hint {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
 }
-
-.ts-layout {
+.teacher-statistics .ts-layout {
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr);
+  grid-template-columns: minmax(230px, 260px) minmax(0, 1fr);
   gap: 20px;
   align-items: start;
 }
-
-.ts-sidebar,
-.ts-panel {
+.teacher-statistics .ts-sidebar,
+.teacher-statistics .ts-panel {
+  min-width: 0;
   padding: 24px;
-  border: 1px solid #414653;
-  border-radius: 12px;
-  background: #20232b;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-card);
 }
-
-.ts-sidebar {
+.teacher-statistics .ts-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
-
-.ts-sidebar h3,
-.ts-panel h3 {
-  margin-top: 0;
+.teacher-statistics .ts-sidebar h3,
+.teacher-statistics .ts-panel h3 {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: var(--font-semibold);
+  color: var(--color-text-primary);
 }
-
-.ts-main {
+.teacher-statistics .ts-main {
   display: flex;
   flex-direction: column;
   gap: 20px;
   min-width: 0;
 }
-
-.ts-test {
+.teacher-statistics .ts-test {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  width: 100%;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
   text-align: left;
   overflow-wrap: anywhere;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
 }
-
-.ts-test small {
-  color: #a4aabb;
+.teacher-statistics .ts-test:hover:not(:disabled) {
+  background: var(--color-surface-muted);
+  border-color: var(--color-border-strong);
 }
-
-.ts-test.active {
-  border-color: #83b5fa;
-  background: #364b65;
+.teacher-statistics .ts-test.active {
+  background: var(--color-surface-muted);
+  border-color: var(--color-secondary);
+  box-shadow: inset 3px 0 0 var(--color-primary);
 }
-
-.ts-pagination {
+.teacher-statistics .ts-test strong {
+  color: var(--color-text-primary);
+  font-weight: var(--font-semibold);
+  font-size: 14px;
+}
+.teacher-statistics .ts-test small {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+.teacher-statistics button:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+.teacher-statistics button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.teacher-statistics .ts-pagination {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
   margin-top: 12px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
 }
-
-.ts-metrics {
+.teacher-statistics .ts-pagination button,
+.teacher-statistics .ts-table button,
+.teacher-statistics .ts-details-heading button {
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-weight: var(--font-medium);
+  font-size: 13px;
+}
+.teacher-statistics .ts-pagination button:hover:not(:disabled),
+.teacher-statistics .ts-table button:hover:not(:disabled),
+.teacher-statistics .ts-details-heading button:hover:not(:disabled) {
+  background: var(--color-surface-muted);
+}
+.teacher-statistics .ts-metrics {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin-top: 20px;
 }
-
-.ts-metric {
+.teacher-statistics .ts-metric {
+  min-width: 0;
   padding: 20px;
-  border: 1px solid #414653;
-  border-radius: 10px;
-  background: #292e39;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
 }
-
-.ts-metric span {
+.teacher-statistics .ts-metric span {
   display: block;
-  color: #a4aabb;
-  font-size: 13px;
   margin-bottom: 12px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
 }
-
-.ts-metric strong {
+.teacher-statistics .ts-metric strong {
+  display: block;
+  color: var(--color-text-primary);
   font-size: 28px;
+  font-weight: var(--font-bold);
+  overflow-wrap: anywhere;
 }
-
-.ts-table-wrap {
+.teacher-statistics .ts-table-wrap {
+  width: 100%;
   overflow-x: auto;
 }
-
-.ts-table {
+.teacher-statistics .ts-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
 }
-
-.ts-table th,
-.ts-table td {
+.teacher-statistics .ts-table th,
+.teacher-statistics .ts-table td {
   padding: 12px;
   text-align: left;
-  border-bottom: 1px solid #414653;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--color-border);
 }
-
-.ts-table th {
-  color: #a4aabb;
-  font-weight: 500;
+.teacher-statistics .ts-table th {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: var(--font-medium);
 }
-
-.ts-table button {
-  padding: 8px 12px;
-}
-
-.ts-details-heading {
+.teacher-statistics .ts-details-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
-
-.ts-question {
+.teacher-statistics .ts-question {
   padding: 16px 0;
-  border-top: 1px solid #414653;
+  border-top: 1px solid var(--color-border);
 }
-
-.ts-question h4 {
+.teacher-statistics .ts-question h4 {
   margin: 0 0 12px;
 }
-
-.ts-correct {
-  color: #6ad49b;
+.teacher-statistics .ts-correct {
+  color: var(--color-success-text);
 }
-
-.ts-incorrect {
-  color: #fb9494;
+.teacher-statistics .ts-incorrect {
+  color: var(--color-error-text);
 }
-
-.ts-error {
+.teacher-statistics .ts-error {
   padding: 14px;
-  margin-bottom: 20px;
-  border-radius: 8px;
-  background: #562e34;
-  color: #ffdcdf;
+  margin: 0 0 20px;
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-sm);
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
 }
-
-@media (max-width: 760px) {
-  .ts-layout {
+@media (max-width: 960px) {
+  .teacher-statistics .ts-layout {
     grid-template-columns: 1fr;
   }
-
-  .ts-sidebar,
-  .ts-panel {
-    padding: 16px;
+  .teacher-statistics .ts-sidebar,
+  .teacher-statistics .ts-panel {
+    padding: 18px;
   }
-
-  .ts-metrics {
+}
+@media (max-width: 520px) {
+  .teacher-statistics .ts-metrics {
     grid-template-columns: 1fr 1fr;
   }
-
-  .ts-details-heading {
+  .teacher-statistics .ts-metric {
+    padding: 14px;
+  }
+  .teacher-statistics .ts-metric strong {
+    font-size: 23px;
+  }
+  .teacher-statistics .ts-details-heading {
     flex-wrap: wrap;
   }
 }
