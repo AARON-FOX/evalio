@@ -23,6 +23,13 @@ import type { RunnerState, RunnerResult } from "../services/activeAttemptsApi";
 import type { SubmissionHistory } from "../services/submissionsApi";
 import type { SubmissionDetail } from "../services/submissionResultApi";
 import type { CreateTestInput, TestRecord } from "../services/testsApi";
+import type {
+  AdminUsersResponse,
+  AdminUserQuery,
+  AdminRoleChange,
+  ChangeRoleRequest,
+  ChangeRoleResult,
+} from "../services/adminApiTypes";
 
 const baseUrl = import.meta.env.VITE_API_URL;
 if (!baseUrl) throw new Error("VITE_API_URL is missing");
@@ -62,11 +69,33 @@ export const evalioApi = createApi({
     "TeacherStatistics",
     "TeacherSubmissionDetails",
     "RunnerAttempt",
+    "AdminUsers",
+    "AdminAudit",
   ],
   keepUnusedDataFor: 30,
   refetchOnFocus: true,
   refetchOnReconnect: true,
   endpoints: (builder) => ({
+    getAdminUsers: builder.query<AdminUsersResponse, AdminUserQuery>({
+      query: ({ page, search, role }) => ({
+        url: "/api/admin/users",
+        params: { page, search, role },
+      }),
+      providesTags: ["AdminUsers"],
+    }),
+    getAdminAudit: builder.query<AdminRoleChange[], void>({
+      query: () => "/api/admin/audit",
+      providesTags: ["AdminAudit"],
+    }),
+    changeUserRole: builder.mutation<ChangeRoleResult, ChangeRoleRequest>({
+      query: ({ userId, ...body }) => ({
+        url: `/api/admin/users/${encodeURIComponent(userId)}/role`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: (_result, error) =>
+        error ? [] : ["AdminUsers", "AdminAudit"],
+    }),
     getCatalog: builder.query<CatalogTest[], void>({
       query: () => "/api/tests",
       transformResponse: (response: unknown) => {
@@ -301,6 +330,9 @@ export const evalioApi = createApi({
 });
 
 export const {
+  useGetAdminUsersQuery,
+  useGetAdminAuditQuery,
+  useChangeUserRoleMutation,
   useGetCatalogQuery,
   useGetStudentDashboardQuery,
   useGetTeacherDashboardQuery,

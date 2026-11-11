@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { FormEvent, ReactNode } from "react";
-import { Link } from "react-router";
+import { Link, Navigate } from "react-router";
 import {
   ArrowRight,
   BarChart3,
@@ -16,17 +16,12 @@ import { useAuth } from "../context/useAuth";
 import { Button } from "../components/ui/Button/Button";
 import { Card } from "../components/ui/Card/Card";
 import { Alert } from "../components/ui/Alert/Alert";
-import { type TeacherDashboardTest } from "../services/dashboardApi";
 import {
-  useGetTeacherDashboardQuery,
-  useGetStudentDashboardQuery,
-} from "../app/evalioApi";
+  type TeacherDashboardTest,
+} from "../services/dashboardApi";
+import { useGetTeacherDashboardQuery, useGetStudentDashboardQuery } from "../app/evalioApi";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
-import {
-  setDashboardPage,
-  setDashboardSearch,
-  setDashboardStatus,
-} from "../app/dashboardFiltersSlice";
+import { setDashboardPage, setDashboardSearch, setDashboardStatus } from "../app/dashboardFiltersSlice";
 import { queryErrorMessage } from "../app/queryError";
 import styles from "./DashboardPage.module.scss";
 
@@ -94,6 +89,9 @@ export function DashboardPage() {
   const { profile } = useAuth();
   if (!profile) return null;
 
+  if (profile.role === "admin") {
+    return <Navigate to="/admin/users" replace />;
+  }
   if (profile.role === "creator") {
     return <TeacherDashboard key={profile.id} />;
   }
@@ -102,24 +100,14 @@ export function DashboardPage() {
 
 function TeacherDashboard() {
   const dispatch = useAppDispatch();
-  const { page, status, search } = useAppSelector(
-    (state) => state.dashboardFilters,
-  );
+  const { page, status, search } = useAppSelector((state) => state.dashboardFilters);
   const [searchInput, setSearchInput] = useState(search);
-  const { data, isLoading, error } = useGetTeacherDashboardQuery({
-    page,
-    status,
-    search,
-  });
-  const current = isLoading
-    ? null
-    : {
-        data,
-        error: error ? queryErrorMessage(error) : undefined,
-      };
-  const totalPages = data
-    ? Math.max(1, Math.ceil(data.total / data.pageSize))
-    : 1;
+  const { data, isLoading, error } = useGetTeacherDashboardQuery({ page, status, search });
+  const current = isLoading ? null : {
+    data,
+    error: error ? queryErrorMessage(error) : undefined,
+  };
+  const totalPages = data ? Math.max(1, Math.ceil(data.total / data.pageSize)) : 1;
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -390,11 +378,9 @@ function TeacherMobileTest({ test }: { test: TeacherDashboardTest }) {
 
 function StudentDashboard() {
   const { data, isLoading, error } = useGetStudentDashboardQuery();
-  const snapshot = isLoading
-    ? null
-    : {
-        error: error ? queryErrorMessage(error) : undefined,
-      };
+  const snapshot = isLoading ? null : {
+    error: error ? queryErrorMessage(error) : undefined,
+  };
   return (
     <section className={styles.dashboard}>
       <div className={styles.headingRow}>

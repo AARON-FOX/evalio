@@ -11,11 +11,12 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { UiKitPage } from "./pages/UiKitPage";
 import { StudentResultsPage } from "./pages/StudentResultsPage";
-import { SubmissionResultPage } from './pages/SubmissionResultPage';
+import { SubmissionResultPage } from "./pages/SubmissionResultPage";
 import { TeacherTestsPage } from "./pages/TeacherTestsPage";
 import { TestEditorPage } from "./pages/TestEditorPage";
 import { StudentTestsPage } from "./pages/StudentTestsPage";
 import { TestRunnerPage } from "./pages/TestRunnerPage";
+import { AdminUsersPage } from "./pages/AdminUsersPage";
 
 import { TeacherStatistics } from "./components/TeacherStatistics/TeacherStatistics";
 
@@ -43,9 +44,12 @@ function App() {
           {/* Student routes */}
           <Route element={<RoleRoute allowedRole="respondent" />}>
             <Route path="/tests" element={<StudentTestsPage />} />
-            
+
             <Route path="/results" element={<StudentResultsPage />} />
-            <Route path="/results/:submissionId" element={<SubmissionResultPage />} />
+            <Route
+              path="/results/:submissionId"
+              element={<SubmissionResultPage />}
+            />
           </Route>
 
           {/* Teacher routes */}
@@ -57,6 +61,10 @@ function App() {
               element={<TestEditorPage />}
             />
             <Route path="/teacher/statistics" element={<TeacherStatistics />} />
+          </Route>
+
+          <Route element={<RoleRoute allowedRole="admin" />}>
+            <Route path="/admin/users" element={<AdminUsersPage />} />
           </Route>
 
           <Route path="/ui-kit" element={<UiKitPage />} />

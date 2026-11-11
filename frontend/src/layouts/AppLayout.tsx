@@ -6,6 +6,8 @@ import {
   BarChart3,
   LogOut,
   GraduationCap,
+  ShieldCheck,
+  UsersRound,
 } from "lucide-react";
 
 import { useAuth } from "../context/useAuth";
@@ -24,6 +26,10 @@ const creatorNav: NavigationItem[] = [
   { to: "/teacher/statistics", label: "Результати", icon: BarChart3 },
 ];
 
+const adminNav: NavigationItem[] = [
+  { to: "/admin/users", label: "Користувачі", icon: UsersRound },
+];
+
 const studentNav: NavigationItem[] = [
   { to: "/dashboard", label: "Огляд", icon: LayoutDashboard },
   { to: "/tests", label: "Мої тести", icon: Files },
@@ -37,8 +43,13 @@ export function AppLayout() {
   if (!profile) return null;
 
   const isCreator = profile.role === "creator";
-  const roleLabel = isCreator ? "Викладач" : "Студент";
-  const nav = isCreator ? creatorNav : studentNav;
+  const isAdmin = profile.role === "admin";
+  const roleLabel = isAdmin
+    ? "Адміністратор"
+    : isCreator
+      ? "Викладач"
+      : "Студент";
+  const nav = isAdmin ? adminNav : isCreator ? creatorNav : studentNav;
   const initials = (profile.email?.split("@")[0] || "E")
     .slice(0, 2)
     .toUpperCase();
@@ -91,7 +102,11 @@ export function AppLayout() {
 
         <div className={styles.sidebarBottom}>
           <div className={styles.supportCard}>
-            <GraduationCap size={20} aria-hidden="true" />
+            {isAdmin ? (
+              <ShieldCheck size={20} aria-hidden="true" />
+            ) : (
+              <GraduationCap size={20} aria-hidden="true" />
+            )}
             <strong>Потрібна допомога?</strong>
             <span>Поради та відповіді щодо роботи з Evalio.</span>
           </div>

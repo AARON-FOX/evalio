@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from "react-router";
-import { useAuth } from '../context/useAuth';
+import { useAuth } from "../context/useAuth";
 
-type Role = "creator" | "respondent";
+type Role = "creator" | "respondent" | "admin";
 
 interface RoleRouteProps {
   allowedRole: Role;

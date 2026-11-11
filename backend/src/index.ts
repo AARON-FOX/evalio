@@ -5,13 +5,14 @@ import { supabase } from "./lib/supabase.js";
 import { createClient } from "@supabase/supabase-js";
 import { testsRouter } from "./routes/tests.js";
 import { submissionsRouter } from "./routes/submissions.js";
-import { teacherStatisticsRouter } from './routes/teacherStatistics.js';
-import { dashboardRouter } from './routes/dashboard.js';
-import { questionEditorRouter } from './routes/questionEditor.js';
-import { testVersionSettingsRouter } from './routes/testVersionSettings.js';
-import { activeAttemptsRouter } from './routes/activeAttempts.js';
-import { legacySubmissionGuard } from './routes/legacySubmissionGuard.js';
-import { submissionResultRouter } from './routes/submissionResult.js';
+import { teacherStatisticsRouter } from "./routes/teacherStatistics.js";
+import { dashboardRouter } from "./routes/dashboard.js";
+import { questionEditorRouter } from "./routes/questionEditor.js";
+import { testVersionSettingsRouter } from "./routes/testVersionSettings.js";
+import { activeAttemptsRouter } from "./routes/activeAttempts.js";
+import { legacySubmissionGuard } from "./routes/legacySubmissionGuard.js";
+import { submissionResultRouter } from "./routes/submissionResult.js";
+import { adminRouter } from "./routes/admin.js";
 
 const app = express();
 
@@ -137,16 +138,17 @@ app.get("/api/me", async (req, res) => {
   }
 });
 
-app.use('/api/tests', legacySubmissionGuard);
+app.use("/api/tests", legacySubmissionGuard);
 
 app.use("/api/tests", testsRouter);
-app.use('/api/attempts', activeAttemptsRouter);
+app.use("/api/attempts", activeAttemptsRouter);
 app.use("/api/submissions", submissionsRouter);
-app.use('/api/submissions', submissionResultRouter);
-app.use('/api/teacher', teacherStatisticsRouter);
-app.use('/api/dashboard', dashboardRouter);
-app.use('/api/tests', questionEditorRouter);
-app.use('/api/tests', testVersionSettingsRouter);
+app.use("/api/submissions", submissionResultRouter);
+app.use("/api/teacher", teacherStatisticsRouter);
+app.use("/api/dashboard", dashboardRouter);
+app.use("/api/tests", questionEditorRouter);
+app.use("/api/tests", testVersionSettingsRouter);
+app.use("/api/admin", adminRouter);
 
 import type { ErrorRequestHandler } from "express";
 
