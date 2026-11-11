@@ -8,6 +8,9 @@ import { supabase } from "../lib/supabase";
 import { getCurrentUser, type CurrentUserResponse } from "../services/api";
 
 import { AuthContext } from "./auth-context";
+import { store } from "../app/store";
+import { evalioApi } from "../app/evalioApi";
+import { resetDashboardFilters } from "../app/dashboardFiltersSlice";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [auth, setAuth] = useState<{
@@ -30,9 +33,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Observe Supabase Auth.
   useEffect(() => {
+    let previousUserId: string | null | undefined;
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      const nextUserId = session?.user.id ?? null;
+      if (
+        event === "SIGNED_OUT" ||
+        (previousUserId !== undefined && previousUserId !== nextUserId)
+      ) {
+        // Clear user-specific RTK Query cache before rendering another account.
+        store.dispatch(evalioApi.util.resetApiState());
+        store.dispatch(resetDashboardFilters());
+      }
+      previousUserId = nextUserId;
       setAuth({
         initialized: true,
         session,

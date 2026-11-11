@@ -71,7 +71,7 @@ function PasswordInput({
           aria-pressed={visible}
           onClick={() => setVisible((current) => !current)}
         >
-          {visible ? <EyeOff size={19} /> : <Eye size={19} />}
+          {visible ? <Eye size={19} /> : <EyeOff size={19} />}
         </button>
       </div>
       {hint && <p className={styles.hint}>{hint}</p>}

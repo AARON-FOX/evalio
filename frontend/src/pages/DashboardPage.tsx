@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import { Link } from "react-router";
 import {
@@ -16,14 +16,18 @@ import { useAuth } from "../context/useAuth";
 import { Button } from "../components/ui/Button/Button";
 import { Card } from "../components/ui/Card/Card";
 import { Alert } from "../components/ui/Alert/Alert";
+import { type TeacherDashboardTest } from "../services/dashboardApi";
 import {
-  getStudentDashboard,
-  getTeacherDashboard,
-  type DashboardStatus,
-  type TeacherDashboardData,
-  type TeacherDashboardTest,
-  type StudentDashboardData,
-} from "../services/dashboardApi";
+  useGetTeacherDashboardQuery,
+  useGetStudentDashboardQuery,
+} from "../app/evalioApi";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import {
+  setDashboardPage,
+  setDashboardSearch,
+  setDashboardStatus,
+} from "../app/dashboardFiltersSlice";
+import { queryErrorMessage } from "../app/queryError";
 import styles from "./DashboardPage.module.scss";
 
 type IconComponent = typeof Files;
@@ -86,10 +90,6 @@ function percent(value: number | null) {
   return value === null ? "—" : `${value.toLocaleString("uk-UA")}%`;
 }
 
-function errorText(error: unknown) {
-  return error instanceof Error ? error.message : "Не вдалося завантажити дані";
-}
-
 export function DashboardPage() {
   const { profile } = useAuth();
   if (!profile) return null;
@@ -101,49 +101,33 @@ export function DashboardPage() {
 }
 
 function TeacherDashboard() {
-  const [page, setPage] = useState(1);
-  const [status, setStatus] = useState<DashboardStatus>("all");
-  const [searchInput, setSearchInput] = useState("");
-  const [search, setSearch] = useState("");
-
-  const requestKey = `${page}|${status}|${search}`;
-  const [snapshot, setSnapshot] = useState<{
-    key: string;
-    data?: TeacherDashboardData;
-    error?: string;
-  } | null>(null);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    void getTeacherDashboard({ page, status, search }, controller.signal)
-      .then((data) => {
-        if (!controller.signal.aborted) {
-          setSnapshot({ key: requestKey, data });
-        }
-      })
-      .catch((error: unknown) => {
-        if (!controller.signal.aborted) {
-          setSnapshot({ key: requestKey, error: errorText(error) });
-        }
-      });
-    return () => controller.abort();
-  }, [page, status, search, requestKey]);
-
-  const current = snapshot?.key === requestKey ? snapshot : null;
-  const data = current?.data;
+  const dispatch = useAppDispatch();
+  const { page, status, search } = useAppSelector(
+    (state) => state.dashboardFilters,
+  );
+  const [searchInput, setSearchInput] = useState(search);
+  const { data, isLoading, error } = useGetTeacherDashboardQuery({
+    page,
+    status,
+    search,
+  });
+  const current = isLoading
+    ? null
+    : {
+        data,
+        error: error ? queryErrorMessage(error) : undefined,
+      };
   const totalPages = data
     ? Math.max(1, Math.ceil(data.total / data.pageSize))
     : 1;
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setPage(1);
-    setSearch(searchInput.trim());
+    dispatch(setDashboardSearch(searchInput.trim()));
   }
 
-  function handleStatus(next: DashboardStatus) {
-    setStatus(next);
-    setPage(1);
+  function handleStatus(next: "all" | "draft" | "published") {
+    dispatch(setDashboardStatus(next));
   }
 
   return (
@@ -319,7 +303,7 @@ function TeacherDashboard() {
                     size="sm"
                     variant="outline"
                     disabled={page <= 1}
-                    onClick={() => setPage(page - 1)}
+                    onClick={() => dispatch(setDashboardPage(page - 1))}
                   >
                     Назад
                   </Button>
@@ -330,7 +314,7 @@ function TeacherDashboard() {
                     size="sm"
                     variant="outline"
                     disabled={page >= totalPages}
-                    onClick={() => setPage(page + 1)}
+                    onClick={() => dispatch(setDashboardPage(page + 1))}
                   >
                     Далі
                   </Button>
@@ -405,25 +389,12 @@ function TeacherMobileTest({ test }: { test: TeacherDashboardTest }) {
 }
 
 function StudentDashboard() {
-  const [snapshot, setSnapshot] = useState<{
-    data?: StudentDashboardData;
-    error?: string;
-  } | null>(null);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    void getStudentDashboard(controller.signal)
-      .then((data) => {
-        if (!controller.signal.aborted) setSnapshot({ data });
-      })
-      .catch((error: unknown) => {
-        if (!controller.signal.aborted)
-          setSnapshot({ error: errorText(error) });
-      });
-    return () => controller.abort();
-  }, []);
-
-  const data = snapshot?.data;
+  const { data, isLoading, error } = useGetStudentDashboardQuery();
+  const snapshot = isLoading
+    ? null
+    : {
+        error: error ? queryErrorMessage(error) : undefined,
+      };
   return (
     <section className={styles.dashboard}>
       <div className={styles.headingRow}>

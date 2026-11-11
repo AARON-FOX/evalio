@@ -1,3 +1,4 @@
+import { invalidateTeacherData } from "../app/cacheInvalidation";
 import { supabase } from "../lib/supabase";
 
 const BASE = import.meta.env.VITE_API_URL;
@@ -88,7 +89,10 @@ export function createDraftRevision(publishedId: string) {
   return request<{ draftId: string }>(
     `/api/tests/${encodeURIComponent(publishedId)}/revisions`,
     "POST",
-  );
+  ).then((result) => {
+    invalidateTeacherData();
+    return result;
+  });
 }
 
 export function getVersions(testId: string) {
@@ -108,7 +112,10 @@ export function updateTestSettings(testId: string, input: TestSettingsInput) {
     `/api/tests/${encodeURIComponent(testId)}/settings`,
     "PATCH",
     input,
-  );
+  ).then((result) => {
+    invalidateTeacherData();
+    return result;
+  });
 }
 
 // Both request bodies require corresponding updates to the existing
@@ -121,7 +128,10 @@ export function addWeightedQuestion(
     `/api/tests/${encodeURIComponent(testId)}/questions`,
     "POST",
     input,
-  );
+  ).then((result) => {
+    invalidateTeacherData();
+    return result;
+  });
 }
 
 export function updateWeightedQuestion(
@@ -133,5 +143,8 @@ export function updateWeightedQuestion(
     `/api/tests/${encodeURIComponent(testId)}/questions/${encodeURIComponent(questionId)}`,
     "PATCH",
     input,
-  );
+  ).then((result) => {
+    invalidateTeacherData();
+    return result;
+  });
 }

@@ -1,54 +1,18 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
 import { ArrowRight, FilePlus2, FileText, PencilLine } from "lucide-react";
 
 import { Card } from "../components/ui/Card/Card";
 import { Button } from "../components/ui/Button/Button";
 import { Alert } from "../components/ui/Alert/Alert";
-import {
-  getTeacherTests,
-  type TeacherTest,
-} from "../services/teacherStatisticsApi";
+import { useGetTeacherTestsQuery } from "../app/evalioApi";
+import { queryErrorMessage } from "../app/queryError";
 import styles from "./TeacherTestsPage.module.scss";
-
-function describeError(error: unknown) {
-  return error instanceof Error
-    ? error.message
-    : "Не вдалося отримати список тестів.";
-}
 
 export function TeacherTestsPage() {
   const [page, setPage] = useState(1);
-  const [snapshot, setSnapshot] = useState<{
-    page: number;
-    items: TeacherTest[];
-    total: number;
-    pageSize: number;
-    error?: string;
-  } | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    void getTeacherTests(page)
-      .then((result) => {
-        if (active) setSnapshot({ page, ...result });
-      })
-      .catch((error: unknown) => {
-        if (active)
-          setSnapshot({
-            page,
-            items: [],
-            total: 0,
-            pageSize: 20,
-            error: describeError(error),
-          });
-      });
-    return () => {
-      active = false;
-    };
-  }, [page]);
-
-  const data = snapshot?.page === page ? snapshot : null;
+  const { data, isLoading, error: queryError } = useGetTeacherTestsQuery(page);
+  const error = queryError ? queryErrorMessage(queryError) : "";
   const totalPages = data
     ? Math.max(1, Math.ceil(data.total / data.pageSize))
     : 1;
@@ -66,14 +30,14 @@ export function TeacherTestsPage() {
         </Link>
       </div>
 
-      {!data && <p role="status">Завантажуємо тести…</p>}
-      {data?.error && (
+      {isLoading && <p role="status">Завантажуємо тести…</p>}
+      {error && (
         <Alert tone="error" title="Не вдалося завантажити тести">
-          {data.error}
+          {error}
         </Alert>
       )}
 
-      {data && !data.error && (
+      {data && !error && (
         <Card className={styles.list}>
           <div className={styles.listHeader}>
             <h2>Ваші тести</h2>

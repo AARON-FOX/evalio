@@ -1,3 +1,4 @@
+import { invalidateStudentProgress } from "../app/cacheInvalidation";
 import { supabase } from "../lib/supabase";
 
 const API = import.meta.env.VITE_API_URL;
@@ -115,7 +116,10 @@ export function finishRunnerAttempt(attemptId: string) {
   return request<RunnerResult>(
     `/api/attempts/${encodeURIComponent(attemptId)}/finish`,
     "POST",
-  );
+  ).then((result) => {
+    invalidateStudentProgress();
+    return result;
+  });
 }
 
 export async function getRunnerCatalog(): Promise<CatalogTest[]> {

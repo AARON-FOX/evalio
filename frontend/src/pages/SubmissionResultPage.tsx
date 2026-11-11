@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 import { Link, useParams } from "react-router";
 import {
@@ -15,11 +14,9 @@ import {
 
 import { Alert } from "../components/ui/Alert/Alert";
 import { Card } from "../components/ui/Card/Card";
-import {
-  getSubmissionDetail,
-  type ReviewedQuestion,
-  type SubmissionDetail,
-} from "../services/submissionResultApi";
+import type { ReviewedQuestion } from "../services/submissionResultApi";
+import { useGetSubmissionDetailQuery } from "../app/evalioApi";
+import { queryErrorMessage } from "../app/queryError";
 import styles from "./SubmissionResultPage.module.scss";
 
 function formatDate(date: string) {
@@ -128,32 +125,12 @@ function AnswerReview({
 
 export function SubmissionResultPage() {
   const { submissionId } = useParams();
-  const [result, setResult] = useState<SubmissionDetail | null>(null);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    if (submissionId) {
-      void getSubmissionDetail(submissionId, controller.signal)
-        .then((data) => {
-          if (!controller.signal.aborted) setResult(data);
-        })
-        .catch((cause: unknown) => {
-          if (!controller.signal.aborted) {
-            setError(
-              cause instanceof Error
-                ? cause.message
-                : "Не вдалося завантажити результат.",
-            );
-          }
-        })
-        .finally(() => {
-          if (!controller.signal.aborted) setLoading(false);
-        });
-    }
-    return () => controller.abort();
-  }, [submissionId]);
+  const {
+    data: result,
+    isLoading: loading,
+    error: queryError,
+  } = useGetSubmissionDetailQuery(submissionId ?? "", { skip: !submissionId });
+  const error = queryError ? queryErrorMessage(queryError) : "";
 
   if (!submissionId)
     return <Alert tone="error">Не вказано ідентифікатор результату.</Alert>;
@@ -204,7 +181,7 @@ export function SubmissionResultPage() {
             {` · Версія ${result.versionNumber}`}
           </p>
         </div>
-        
+
         <Link to="/dashboard" className={styles.headingLink}>
           <ArrowLeft size={16} /> До кабінету
         </Link>
