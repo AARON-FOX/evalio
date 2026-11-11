@@ -27,6 +27,7 @@ export function invalidateStudentProgress() {
       "TeacherDashboard",
       "SubmissionHistory",
       "Catalog",
+      "TeacherStatistics",
     ]),
   );
 }

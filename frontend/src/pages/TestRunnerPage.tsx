@@ -13,17 +13,17 @@ import { Button } from "../components/ui/Button/Button";
 import { Card } from "../components/ui/Card/Card";
 import { Choice } from "../components/ui/Choice/Choice";
 import {
-  startRunnerAttempt,
-  getRunnerAttempt,
-  saveRunnerAnswer,
-  finishRunnerAttempt,
-  type RunnerResult,
-  type RunnerState,
-} from "../services/activeAttemptsApi";
+  useStartRunnerAttemptMutation,
+  useLazyGetRunnerAttemptQuery,
+  useSaveRunnerAnswerMutation,
+  useFinishRunnerAttemptMutation,
+} from "../app/evalioApi";
+import type { RunnerResult, RunnerState } from "../services/activeAttemptsApi";
+import { queryErrorMessage } from "../app/queryError";
 import styles from "./TestRunnerPage.module.scss";
 
 function errorText(error: unknown) {
-  return error instanceof Error ? error.message : "Не вдалося виконати запит.";
+  return queryErrorMessage(error);
 }
 
 function timeText(milliseconds: number) {
@@ -33,6 +33,10 @@ function timeText(milliseconds: number) {
 
 export function TestRunnerPage() {
   const { testId } = useParams();
+  const [startRunner] = useStartRunnerAttemptMutation();
+  const [getRunner] = useLazyGetRunnerAttemptQuery();
+  const [saveAnswer] = useSaveRunnerAnswerMutation();
+  const [finishRunner] = useFinishRunnerAttemptMutation();
   const [attempt, setAttempt] = useState<RunnerState | null>(null);
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
   const [index, setIndex] = useState(0);
@@ -50,8 +54,8 @@ export function TestRunnerPage() {
     if (!testId) return;
     void (async () => {
       try {
-        const { attemptId } = await startRunnerAttempt(testId);
-        const result = await getRunnerAttempt(attemptId);
+        const { attemptId } = await startRunner(testId).unwrap();
+        const result = await getRunner(attemptId).unwrap();
         if (!current) return;
         setAttempt(result);
         setNow(Date.now());
@@ -68,7 +72,7 @@ export function TestRunnerPage() {
     return () => {
       current = false;
     };
-  }, [testId]);
+  }, [testId, startRunner, getRunner]);
 
   const active = attempt?.status === "active" ? attempt : null;
   const questions = active?.questions ?? [];
@@ -93,7 +97,7 @@ export function TestRunnerPage() {
     setFinishing(true);
     setError("");
     try {
-      const result: RunnerResult = await finishRunnerAttempt(attempt.id);
+      const result: RunnerResult = await finishRunner(attempt.id).unwrap();
       setAttempt({
         id: attempt.id,
         status: "submitted",
@@ -107,7 +111,7 @@ export function TestRunnerPage() {
       finishLock.current = false;
       setFinishing(false);
     }
-  }, [attempt]);
+  }, [attempt, finishRunner]);
 
   useEffect(() => {
     if (!active) return;
@@ -145,7 +149,11 @@ export function TestRunnerPage() {
     setError("");
     setAnswers((prev) => ({ ...prev, [question.id]: next }));
     try {
-      await saveRunnerAnswer(active.id, question.id, next);
+      await saveAnswer({
+        attemptId: active.id,
+        questionId: question.id,
+        optionIds: next,
+      }).unwrap();
     } catch (cause) {
       setAnswers((prev) => ({ ...prev, [question.id]: before }));
       setError(errorText(cause));

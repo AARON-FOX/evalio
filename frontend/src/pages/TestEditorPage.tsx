@@ -18,29 +18,13 @@ import {
 import { Button } from "../components/ui/Button/Button";
 import { Card } from "../components/ui/Card/Card";
 import { Alert } from "../components/ui/Alert/Alert";
-import { getTestDetails, updateTest } from "../services/testsApi";
-
 import type { TestDetails, TestKind, TestQuestion } from "../services/testsApi";
-
-import {
-  createDraftRevision,
-  getVersions,
-  getTestSettings,
-  updateTestSettings,
-  addWeightedQuestion,
-  updateWeightedQuestion,
-} from "../services/testVersioningApi";
 
 import type {
   TestSettings,
   VersionRecord,
   WeightedQuestionInput,
 } from "../services/testVersioningApi";
-
-import {
-  getEditableTest,
-  deleteDraftQuestion,
-} from "../services/questionEditorApi";
 
 import type {
   EditableQuestion,
@@ -51,6 +35,16 @@ import { ConfirmDialog } from "../components/ui/ConfirmDialog/ConfirmDialog";
 import {
   useCreateTestMutation,
   usePublishTestMutation,
+  useLazyGetTestSettingsQuery,
+  useLazyGetTestVersionsQuery,
+  useLazyGetDraftEditorQuery,
+  useLazyGetTestDetailsQuery,
+  useUpdateTestMetadataMutation,
+  useUpdateTestSettingsMutation,
+  useCreateDraftRevisionMutation,
+  useAddWeightedQuestionMutation,
+  useUpdateWeightedQuestionMutation,
+  useDeleteDraftQuestionMutation,
 } from "../app/evalioApi";
 import { queryErrorMessage } from "../app/queryError";
 
@@ -262,6 +256,7 @@ export function TestEditorPage() {
 function CreateTestPage() {
   const navigate = useNavigate();
   const [createTest] = useCreateTestMutation();
+  const [patchSettings] = useUpdateTestSettingsMutation();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [kind, setKind] = useState<TestKind>("test");
@@ -283,7 +278,7 @@ function CreateTestPage() {
       draftId = draft.id;
       setCreatedId(draft.id);
       // Unlike legacy tests, new tests start with one attempt by default.
-      await updateTestSettings(draft.id, { maxAttempts: 1 });
+      await patchSettings({ id: draft.id, input: { maxAttempts: 1 } }).unwrap();
       navigate(`/teacher/tests/${draft.id}/edit`, { replace: true });
     } catch (err) {
       setError(
@@ -381,6 +376,16 @@ function CreateTestPage() {
 
 function ExistingTestEditor({ testId }: { testId: string }) {
   const [publishTest] = usePublishTestMutation();
+  const [loadSettings] = useLazyGetTestSettingsQuery();
+  const [loadVersions] = useLazyGetTestVersionsQuery();
+  const [loadDraftEditor] = useLazyGetDraftEditorQuery();
+  const [loadPublished] = useLazyGetTestDetailsQuery();
+  const [patchTestMetadata] = useUpdateTestMetadataMutation();
+  const [patchSettings] = useUpdateTestSettingsMutation();
+  const [makeRevision] = useCreateDraftRevisionMutation();
+  const [addQuestion] = useAddWeightedQuestionMutation();
+  const [patchQuestion] = useUpdateWeightedQuestionMutation();
+  const [removeDraftQuestion] = useDeleteDraftQuestionMutation();
   const navigate = useNavigate();
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [loadError, setLoadError] = useState("");
@@ -401,12 +406,12 @@ function ExistingTestEditor({ testId }: { testId: string }) {
     let active = true;
     async function load() {
       try {
-        const settings = await getTestSettings(testId); // Verifies that the creator owns this test.
+        const settings = await loadSettings(testId).unwrap(); // Creator-only API.
         const [versions, data] = await Promise.all([
-          getVersions(testId),
+          loadVersions(testId).unwrap(),
           settings.status === "draft"
-            ? getEditableTest(testId)
-            : getTestDetails(testId),
+            ? loadDraftEditor(testId).unwrap()
+            : loadPublished(testId).unwrap(),
         ]);
         if (!active) return;
         const editor =
@@ -428,16 +433,16 @@ function ExistingTestEditor({ testId }: { testId: string }) {
     return () => {
       active = false;
     };
-  }, [testId]);
+  }, [testId, loadSettings, loadVersions, loadDraftEditor, loadPublished]);
 
   async function refreshEditor(
     focusId?: string | null,
     preserveMetadata = false,
   ) {
     const [editor, settings, versions] = await Promise.all([
-      getEditableTest(testId),
-      getTestSettings(testId),
-      getVersions(testId),
+      loadDraftEditor(testId).unwrap(),
+      loadSettings(testId).unwrap(),
+      loadVersions(testId).unwrap(),
     ]);
     setLoaded({ settings, versions, editor, published: null });
     // Question-only actions must not overwrite unsaved fields in the settings panel.
@@ -511,9 +516,14 @@ function ExistingTestEditor({ testId }: { testId: string }) {
     try {
       const payload = questionPayload(question, loaded.settings.kind);
       let id = selectedQuestionId;
-      if (id) await updateWeightedQuestion(testId, id, payload);
+      if (id)
+        await patchQuestion({
+          testId,
+          questionId: id,
+          input: payload,
+        }).unwrap();
       else {
-        const created = await addWeightedQuestion(testId, payload);
+        const created = await addQuestion({ testId, input: payload }).unwrap();
         id = created.id;
       }
       await refreshEditor(id, true);
@@ -532,17 +542,29 @@ function ExistingTestEditor({ testId }: { testId: string }) {
     setNotice("");
     try {
       if (!metadata.title.trim()) throw new Error("Назва тесту обов’язкова.");
-      await updateTest(testId, {
+      await patchTestMetadata({
+        id: testId,
         title: metadata.title.trim(),
         description: metadata.description.trim() || null,
-      });
-      await updateTestSettings(testId, settingsPayload(metadata));
+      }).unwrap();
+      await patchSettings({
+        id: testId,
+        input: settingsPayload(metadata),
+      }).unwrap();
       let id = selectedQuestionId;
       if (questionDirty) {
         const payload = questionPayload(question, loaded.settings.kind);
-        if (id) await updateWeightedQuestion(testId, id, payload);
+        if (id)
+          await patchQuestion({
+            testId,
+            questionId: id,
+            input: payload,
+          }).unwrap();
         else {
-          const created = await addWeightedQuestion(testId, payload);
+          const created = await addQuestion({
+            testId,
+            input: payload,
+          }).unwrap();
           id = created.id;
         }
       }
@@ -575,10 +597,10 @@ function ExistingTestEditor({ testId }: { testId: string }) {
     setNotice("");
     try {
       const copy = questionFromSaved(saved);
-      const added = await addWeightedQuestion(
+      const added = await addQuestion({
         testId,
-        questionPayload(copy, loaded.settings.kind),
-      );
+        input: questionPayload(copy, loaded.settings.kind),
+      }).unwrap();
       await refreshEditor(added.id, true);
       setNotice("Питання дубльовано.");
     } catch (err) {
@@ -598,7 +620,10 @@ function ExistingTestEditor({ testId }: { testId: string }) {
     setActionError("");
     setNotice("");
     try {
-      await deleteDraftQuestion(testId, selectedQuestionId);
+      await removeDraftQuestion({
+        testId,
+        questionId: selectedQuestionId,
+      }).unwrap();
       await refreshEditor(null, true);
       setNotice("Питання видалено з чернетки.");
     } catch (err) {
@@ -637,9 +662,9 @@ function ExistingTestEditor({ testId }: { testId: string }) {
     try {
       await publishTest(testId).unwrap();
       const [settings, versions, published] = await Promise.all([
-        getTestSettings(testId),
-        getVersions(testId),
-        getTestDetails(testId),
+        loadSettings(testId).unwrap(),
+        loadVersions(testId).unwrap(),
+        loadPublished(testId).unwrap(),
       ]);
       setLoaded({ settings, versions, editor: null, published });
       setMetadata(metadataFromSettings(settings));
@@ -660,7 +685,7 @@ function ExistingTestEditor({ testId }: { testId: string }) {
     setBusy(true);
     setActionError("");
     try {
-      const { draftId } = await createDraftRevision(testId);
+      const { draftId } = await makeRevision(testId).unwrap();
       navigate(`/teacher/tests/${draftId}/edit`);
     } catch (err) {
       setActionError(errorText(err));
