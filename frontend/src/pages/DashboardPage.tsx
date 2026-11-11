@@ -8,6 +8,7 @@ import {
   ClipboardList,
   FilePlus2,
   Files,
+  CircleHelp,
   Search,
   Users,
 } from "lucide-react";
@@ -16,12 +17,17 @@ import { useAuth } from "../context/useAuth";
 import { Button } from "../components/ui/Button/Button";
 import { Card } from "../components/ui/Card/Card";
 import { Alert } from "../components/ui/Alert/Alert";
+import { type TeacherDashboardTest } from "../services/dashboardApi";
 import {
-  type TeacherDashboardTest,
-} from "../services/dashboardApi";
-import { useGetTeacherDashboardQuery, useGetStudentDashboardQuery } from "../app/evalioApi";
+  useGetTeacherDashboardQuery,
+  useGetStudentDashboardQuery,
+} from "../app/evalioApi";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
-import { setDashboardPage, setDashboardSearch, setDashboardStatus } from "../app/dashboardFiltersSlice";
+import {
+  setDashboardPage,
+  setDashboardSearch,
+  setDashboardStatus,
+} from "../app/dashboardFiltersSlice";
 import { queryErrorMessage } from "../app/queryError";
 import styles from "./DashboardPage.module.scss";
 
@@ -32,17 +38,29 @@ function Metric({
   value,
   caption,
   icon: Icon,
+  tooltip,
 }: {
   label: string;
   value: string | number;
   caption: string;
   icon: IconComponent;
+  tooltip: string;
 }) {
   return (
     <Card className={styles.metricCard}>
       <div className={styles.metricTop}>
         <span>{label}</span>
-        <Icon size={19} aria-hidden="true" />
+        <div className={styles.metricInfo}>
+          <Icon size={19} aria-hidden="true" />
+          <details className={styles.tooltipDetails}>
+            <summary aria-label={`Пояснення показника: ${label}`}>
+              <CircleHelp size={16} aria-hidden="true" />
+            </summary>
+            <span role="tooltip" className={styles.tooltip}>
+              {tooltip}
+            </span>
+          </details>
+        </div>
       </div>
       <strong className={styles.metricValue}>{value}</strong>
       <span className={styles.metricCaption}>{caption}</span>
@@ -100,14 +118,24 @@ export function DashboardPage() {
 
 function TeacherDashboard() {
   const dispatch = useAppDispatch();
-  const { page, status, search } = useAppSelector((state) => state.dashboardFilters);
+  const { page, status, search } = useAppSelector(
+    (state) => state.dashboardFilters,
+  );
   const [searchInput, setSearchInput] = useState(search);
-  const { data, isLoading, error } = useGetTeacherDashboardQuery({ page, status, search });
-  const current = isLoading ? null : {
-    data,
-    error: error ? queryErrorMessage(error) : undefined,
-  };
-  const totalPages = data ? Math.max(1, Math.ceil(data.total / data.pageSize)) : 1;
+  const { data, isLoading, error } = useGetTeacherDashboardQuery({
+    page,
+    status,
+    search,
+  });
+  const current = isLoading
+    ? null
+    : {
+        data,
+        error: error ? queryErrorMessage(error) : undefined,
+      };
+  const totalPages = data
+    ? Math.max(1, Math.ceil(data.total / data.pageSize))
+    : 1;
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -151,24 +179,28 @@ function TeacherDashboard() {
               value={data.stats.totalTests}
               caption="Створені вами"
               icon={Files}
+              tooltip="Кількість створених вами тестів та опитувань (без повторного підрахунку старих версій). Включає чернетки."
             />
             <Metric
               label="Активні тести"
               value={data.stats.publishedTests}
               caption="Опубліковані"
               icon={ClipboardList}
+              tooltip="Кількість актуальних опублікованих тестів. Відкладені та прострочені дедлайни можуть обмежувати можливість проходження."
             />
             <Metric
               label="Проходження"
               value={data.stats.totalAttempts}
               caption="Усі завершені спроби"
               icon={Users}
+              tooltip="Усі завершені проходження ваших тестів і опитувань, включно з повторними спробами студентів."
             />
             <Metric
               label="Середній результат"
               value={percent(data.stats.averagePercent)}
               caption="За оціненими спробами"
               icon={BarChart3}
+              tooltip="Середній відсоток отриманих балів від максимально можливих у завершених оцінюваних спробах ваших тестів. Це допомагає побачити загальну складність матеріалу для студентів. Опитування без оцінювання не враховуються."
             />
           </div>
 
@@ -321,10 +353,18 @@ function TeacherDashboard() {
             {data.recentSubmissions.map((attempt) => (
               <div className={styles.recentRow} key={attempt.id}>
                 <span className={styles.recentAvatar}>
-                  {attempt.respondentId.slice(0, 2).toUpperCase()}
+                  {(
+                    attempt.respondentEmail?.split("@")[0] ??
+                    attempt.respondentId
+                  )
+                    .slice(0, 2)
+                    .toUpperCase()}
                 </span>
                 <div className={styles.recentText}>
-                  <strong>Учасник {attempt.respondentId.slice(0, 8)}</strong>
+                  <strong>
+                    {attempt.respondentEmail ||
+                      `Учасник ${attempt.respondentId.slice(0, 8)}`}
+                  </strong>
                   <span>
                     {attempt.testTitle} · {dateText(attempt.submittedAt)}
                   </span>
@@ -378,9 +418,11 @@ function TeacherMobileTest({ test }: { test: TeacherDashboardTest }) {
 
 function StudentDashboard() {
   const { data, isLoading, error } = useGetStudentDashboardQuery();
-  const snapshot = isLoading ? null : {
-    error: error ? queryErrorMessage(error) : undefined,
-  };
+  const snapshot = isLoading
+    ? null
+    : {
+        error: error ? queryErrorMessage(error) : undefined,
+      };
   return (
     <section className={styles.dashboard}>
       <div className={styles.headingRow}>
@@ -411,18 +453,21 @@ function StudentDashboard() {
               value={data.availableCount}
               caption="Опубліковані тести й опитування"
               icon={ClipboardList}
+              tooltip="Кількість актуальних опублікованих завдань, для яких у вас ще немає завершеної спроби. Доступність за лімітом і дедлайном перевіряйте на сторінці кожного тесту."
             />
             <Metric
               label="Завершено"
               value={data.completedTests}
               caption={`${data.totalAttempts} спроб загалом`}
               icon={CheckCircle2}
+              tooltip="Кількість тестів, які ви вже завершували. Підпис під числом показує загальну кількість завершених спроб, включно з повторними."
             />
             <Metric
               label="Середній результат"
               value={percent(data.averagePercent)}
               caption="За оціненими спробами"
               icon={BarChart3}
+              tooltip="Середній відсоток вашого результату за завершеними тестами з оцінюванням. Опитування без оцінювання не враховуються."
             />
           </div>
 
@@ -471,7 +516,8 @@ function StudentDashboard() {
                         index === 0 ? styles.primaryLink : styles.outlineLink
                       }
                     >
-                      <ArrowRight size={17} aria-hidden="true" /> Почати
+                      <ArrowRight size={17} aria-hidden="true" /> Перейти до
+                      тесту
                     </Link>
                   </Card>
                 ))}

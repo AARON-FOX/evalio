@@ -248,3 +248,18 @@
     font-weight: 600;
   }
 }
+
+.supportCard {
+  text-decoration: none;
+  color: inherit;
+  transition:
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+  &:hover {
+    box-shadow: var(--shadow-card);
+  }
+  &:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+}

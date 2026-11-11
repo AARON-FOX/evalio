@@ -329,3 +329,20 @@
     padding: 28px 0;
   }
 }
+
+.headerHelp,
+.footer a {
+  color: var(--color-secondary);
+  text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+  }
+  &:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+}
+.terms a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

@@ -319,3 +319,55 @@
     font-size: 18px;
   }
 }
+
+.unavailablePage {
+  min-height: 70vh;
+  display: grid;
+  place-items: center;
+  padding: 40px 20px;
+}
+.unavailableCard {
+  max-width: 520px;
+  width: 100%;
+  padding: 36px;
+  display: grid;
+  gap: 14px;
+  text-align: center;
+  justify-items: center;
+}
+.unavailableCard h1 {
+  margin: 0;
+  font-size: clamp(22px, 4vw, 29px);
+}
+.unavailableCard p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.unavailableActions {
+  margin-top: 10px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.unavailableActions a {
+  display: inline-flex;
+  padding: 10px 15px;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: white;
+  font-weight: 500;
+  font-size: 14px;
+}
+.unavailableActions a + a {
+  background: var(--color-surface-muted);
+  color: var(--color-primary);
+  border: 1px solid var(--color-border);
+}
+.unavailableActions a:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}

@@ -2,6 +2,10 @@ import { Router } from "express";
 import { z } from "zod";
 
 import { supabaseAdmin } from "../lib/supabaseAdmin.js";
+import {
+  attachRespondentEmails,
+  respondentEmailMap,
+} from "../lib/respondentEmails.js";
 import { requireAuth, requireCreator } from "../middleware/requireAuth.js";
 
 export const teacherStatisticsRouter = Router();
@@ -30,7 +34,7 @@ teacherStatisticsRouter.get("/tests", async (req, res) => {
     .from("tests")
     .select("id, title, kind, status, created_at", { count: "exact" })
     .eq("creator_id", req.authUser!.id)
-    .or('status.eq.draft,is_current.eq.true')
+    .or("status.eq.draft,is_current.eq.true")
     .order("created_at", { ascending: false })
     .range(from, from + pageSize - 1);
 
@@ -81,6 +85,16 @@ teacherStatisticsRouter.get("/tests/:id/statistics", async (req, res) => {
     return;
   }
 
+  const result = data as {
+    recentSubmissions?: Array<{ respondentId: string }>;
+  } | null;
+  if (result && Array.isArray(result.recentSubmissions)) {
+    res.json({
+      ...result,
+      recentSubmissions: await attachRespondentEmails(result.recentSubmissions),
+    });
+    return;
+  }
   res.json(data);
 });
 
@@ -125,6 +139,15 @@ teacherStatisticsRouter.get(
       return;
     }
 
+    const result = data as { respondentId?: string } | null;
+    if (result?.respondentId) {
+      const emails = await respondentEmailMap([result.respondentId]);
+      res.json({
+        ...result,
+        respondentEmail: emails.get(result.respondentId) ?? null,
+      });
+      return;
+    }
     res.json(data);
   },
 );

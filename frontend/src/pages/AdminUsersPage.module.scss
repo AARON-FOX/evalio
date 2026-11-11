@@ -294,3 +294,54 @@
     gap: 6px;
   }
 }
+
+.metricHelp {
+  position: absolute;
+  right: 40px;
+  top: 12px;
+}
+.metricHelp summary {
+  list-style: none;
+  cursor: help;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+}
+.metricHelp summary::-webkit-details-marker {
+  display: none;
+}
+.metricHelp summary:hover {
+  background: var(--color-surface-muted);
+}
+.metricHelp summary:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+.metricHelp summary svg {
+  position: static;
+  width: 16px;
+  height: 16px;
+}
+.metricTooltip {
+  display: none;
+  position: absolute;
+  z-index: 60;
+  right: 0;
+  top: 31px;
+  width: min(255px, 70vw);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  background: var(--color-surface);
+  color: var(--color-text-primary) !important;
+  box-shadow: var(--shadow-hover);
+  font-size: 12px !important;
+  line-height: 1.55;
+}
+.metricHelp[open] .metricTooltip,
+.metricHelp:hover .metricTooltip,
+.metricHelp:focus-within .metricTooltip {
+  display: block;
+}

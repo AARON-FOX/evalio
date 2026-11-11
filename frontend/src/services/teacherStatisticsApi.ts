@@ -20,6 +20,7 @@ export interface TeacherTestsResponse {
 export interface StatisticsAttempt {
   id: string;
   respondentId: string;
+  respondentEmail?: string | null;
   score: number | null;
   maxScore: number | null;
   submittedAt: string;
@@ -51,6 +52,7 @@ export interface SubmissionQuestion {
 export interface SubmissionDetails {
   id: string;
   respondentId: string;
+  respondentEmail?: string | null;
   score: number | null;
   maxScore: number | null;
   submittedAt: string;

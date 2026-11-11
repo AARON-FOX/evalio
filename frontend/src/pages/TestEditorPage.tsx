@@ -1017,7 +1017,15 @@ function ExistingTestEditor({ testId }: { testId: string }) {
                         max={100}
                         value={question.points}
                         onChange={(event) =>
-                          updateQuestion({ points: Number(event.target.value) })
+                          updateQuestion({
+                            points: Math.min(
+                              100,
+                              Math.max(
+                                1,
+                                Math.trunc(Number(event.target.value) || 1),
+                              ),
+                            ),
+                          })
                         }
                       />
                     </Field>
@@ -1145,8 +1153,8 @@ function ExistingTestEditor({ testId }: { testId: string }) {
                   />
 
                   <p className={styles.fieldHint}>
-                    Поки лише налаштування. Серверний таймер з'явиться на етапі
-                    активних спроб.
+                    Час відлічується сервером після натискання студентом «Почати
+                    тест».
                   </p>
                 </Field>
                 <Field label="Кількість спроб">
@@ -1157,7 +1165,20 @@ function ExistingTestEditor({ testId }: { testId: string }) {
                     placeholder="Без обмеження"
                     value={metadata.maxAttempts}
                     onChange={(event) =>
-                      updateMetadata("maxAttempts", event.target.value)
+                      updateMetadata(
+                        "maxAttempts",
+                        event.target.value === ""
+                          ? ""
+                          : String(
+                              Math.min(
+                                20,
+                                Math.max(
+                                  1,
+                                  Math.trunc(Number(event.target.value) || 1),
+                                ),
+                              ),
+                            ),
+                      )
                     }
                   />
 
@@ -1247,6 +1268,7 @@ function ExistingTestEditor({ testId }: { testId: string }) {
                 <button
                   type="button"
                   aria-label="Закрити попередній перегляд"
+                  className={styles.previewClose}
                   onClick={() => setPreview(false)}
                 >
                   <X size={18} />

@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import {
   ClipboardClock,
+  CircleHelp,
   Search,
   ShieldCheck,
   UserRoundCog,
@@ -40,6 +41,19 @@ function prettyDate(value: string | null): string {
         day: "numeric",
       })
     : "—";
+}
+
+function AdminTooltip({ text }: { text: string }) {
+  return (
+    <details className={styles.metricHelp}>
+      <summary aria-label="Пояснення показника">
+        <CircleHelp size={16} aria-hidden="true" />
+      </summary>
+      <span role="tooltip" className={styles.metricTooltip}>
+        {text}
+      </span>
+    </details>
+  );
 }
 
 function RolePill({ role }: { role: AdminUser["role"] }) {
@@ -166,21 +180,25 @@ export function AdminUsersPage() {
             <span>Усього користувачів</span>
             <strong>{data.summary.total}</strong>
             <Users size={20} />
+            <AdminTooltip text="Кількість усіх зареєстрованих облікових записів у системі незалежно від ролі." />
           </Card>
           <Card>
             <span>Студентів</span>
             <strong>{data.summary.respondents}</strong>
             <Users size={20} />
+            <AdminTooltip text="Кількість акаунтів із роллю respondent, які можуть проходити опубліковані завдання." />
           </Card>
           <Card>
             <span>Викладачів</span>
             <strong>{data.summary.creators}</strong>
             <UserRoundCog size={20} />
+            <AdminTooltip text="Кількість акаунтів із роллю creator, які можуть створювати тести й переглядати результати власних тестів." />
           </Card>
           <Card>
             <span>Адміністраторів</span>
             <strong>{data.summary.admins}</strong>
             <ShieldCheck size={20} />
+            <AdminTooltip text="Акаунти з роллю admin для керування ролями. Призначення нових адміністраторів у вебкабінеті заборонене." />
           </Card>
         </div>
       )}
