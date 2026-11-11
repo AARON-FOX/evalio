@@ -1,22 +1,12 @@
-import { useEffect, useState } from "react";
-
-import { supabase } from "../../lib/supabase";
-import { getCurrentUser } from "../../services/api";
-
+import { useState } from "react";
 import {
-  getTeacherTests,
-  getTestStatistics,
-  getSubmissionDetails,
-  type TeacherTest,
-  type TestStatistics,
-  type SubmissionDetails,
-} from "../../services/teacherStatisticsApi";
-
+  useGetTeacherTestsQuery,
+  useGetTestStatisticsQuery,
+  useGetTeacherSubmissionDetailsQuery,
+} from "../../app/evalioApi";
+import { queryErrorMessage } from "../../app/queryError";
+import { useAuth } from "../../context/useAuth";
 import "./TeacherStatistics.css";
-
-function errorText(error: unknown): string {
-  return error instanceof Error ? error.message : "Невідома помилка";
-}
 
 function formatDate(value: string): string {
   return new Date(value).toLocaleString("uk-UA");
@@ -26,163 +16,68 @@ function shortId(id: string): string {
   return id.slice(0, 8);
 }
 
+// Auth and creator role are enforced by ProtectedRoute + RoleRoute in App.tsx.
+// All reads go through the shared RTK Query API and the Express role checks.
 export function TeacherStatistics() {
-  const [authReady, setAuthReady] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUserId(session?.user.id ?? null);
-      setAuthReady(true);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  if (!authReady) {
-    return <p>Перевірка авторизації...</p>;
-  }
-
-  if (!userId) {
-    return (
-      <section className="teacher-statistics">
-        <h2>Статистика тестувань</h2>
-        <p>Увійди до Evalio, щоб переглянути статистику.</p>
-      </section>
-    );
-  }
-
-  return <StatisticsWorkspace key={userId} userId={userId} />;
+  const { session } = useAuth();
+  // Remount page-local selection when account changes.
+  return <StatisticsWorkspace key={session?.user.id ?? "guest"} />;
 }
 
-function StatisticsWorkspace({ userId }: { userId: string }) {
-  const [pageState, setPageState] = useState<
-    "loading" | "ready" | "forbidden" | "error"
-  >("loading");
-
-  const [tests, setTests] = useState<TeacherTest[]>([]);
+function StatisticsWorkspace() {
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
+  const [selectedTestId, setSelectedTestId] = useState<string | null>(null);
+  const [selectedSubmissionId, setSelectedSubmissionId] = useState<
+    string | null
+  >(null);
 
-  const [statistics, setStatistics] = useState<TestStatistics | null>(null);
+  const testsQuery = useGetTeacherTestsQuery(page);
+  const statisticsQuery = useGetTestStatisticsQuery(selectedTestId ?? "", {
+    skip: !selectedTestId,
+  });
+  const detailsQuery = useGetTeacherSubmissionDetailsQuery(
+    {
+      testId: selectedTestId ?? "",
+      submissionId: selectedSubmissionId ?? "",
+    },
+    { skip: !selectedTestId || !selectedSubmissionId },
+  );
 
-  const [details, setDetails] = useState<SubmissionDetails | null>(null);
-
-  const [working, setWorking] = useState(false);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        if (!session || session.user.id !== userId) {
-          throw new Error("Authentication required");
-        }
-
-        const user = await getCurrentUser(session.access_token);
-
-        if (cancelled) return;
-
-        if (user.role !== "creator") {
-          setPageState("forbidden");
-          return;
-        }
-
-        const response = await getTeacherTests(page);
-
-        if (cancelled) return;
-
-        setTests(response.items);
-        setTotal(response.total);
-        setPageSize(response.pageSize);
-        setPageState("ready");
-      } catch (err) {
-        if (!cancelled) {
-          setError(errorText(err));
-          setPageState("error");
-        }
-      }
-    }
-
-    void load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [userId, page]);
+  const tests = testsQuery.currentData?.items ?? [];
+  const total = testsQuery.currentData?.total ?? 0;
+  const pageSize = testsQuery.currentData?.pageSize ?? 20;
+  const statistics = selectedTestId
+    ? (statisticsQuery.currentData ?? null)
+    : null;
+  const details = selectedSubmissionId
+    ? (detailsQuery.currentData ?? null)
+    : null;
+  const working = statisticsQuery.isFetching || detailsQuery.isFetching;
+  const errorValue =
+    testsQuery.error ?? statisticsQuery.error ?? detailsQuery.error;
+  const error = errorValue ? queryErrorMessage(errorValue) : "";
 
   function changePage(nextPage: number) {
-    setPageState("loading");
-    setStatistics(null);
-    setDetails(null);
-    setError("");
+    setSelectedTestId(null);
+    setSelectedSubmissionId(null);
     setPage(nextPage);
   }
 
-  async function openStatistics(testId: string) {
-    if (working) return;
-
-    setWorking(true);
-    setError("");
-    setStatistics(null);
-    setDetails(null);
-
-    try {
-      const result = await getTestStatistics(testId);
-      setStatistics(result);
-    } catch (err) {
-      setError(errorText(err));
-    } finally {
-      setWorking(false);
-    }
+  function openStatistics(testId: string) {
+    setSelectedSubmissionId(null);
+    setSelectedTestId(testId);
   }
 
-  async function openSubmission(submissionId: string) {
-    if (!statistics || working) return;
-
-    setWorking(true);
-    setError("");
-    setDetails(null);
-
-    try {
-      const result = await getSubmissionDetails(
-        statistics.testId,
-        submissionId,
-      );
-
-      setDetails(result);
-    } catch (err) {
-      setError(errorText(err));
-    } finally {
-      setWorking(false);
-    }
+  function openSubmission(submissionId: string) {
+    if (!selectedTestId) return;
+    setSelectedSubmissionId(submissionId);
   }
 
-  if (pageState === "loading") {
-    return <p>Завантаження статистики...</p>;
-  }
-
-  if (pageState === "forbidden") {
+  if (testsQuery.isLoading) return <p>Завантаження статистики...</p>;
+  if (testsQuery.isError && !testsQuery.data) {
     return (
       <section className="teacher-statistics">
-        <h2>Статистика тестувань</h2>
-        <p>Цей розділ доступний лише викладачам.</p>
-      </section>
-    );
-  }
-
-  if (pageState === "error") {
-    return (
-      <section className="teacher-statistics">
-        <h2>Помилка завантаження</h2>
+        <h2>Не вдалося отримати статистику</h2>
         <p role="alert">{error}</p>
       </section>
     );
@@ -217,7 +112,7 @@ function StatisticsWorkspace({ userId }: { userId: string }) {
               className={
                 statistics?.testId === test.id ? "ts-test active" : "ts-test"
               }
-              onClick={() => void openStatistics(test.id)}
+              onClick={() => openStatistics(test.id)}
             >
               <strong>{test.title}</strong>
               <small>
@@ -333,7 +228,7 @@ function StatisticsWorkspace({ userId }: { userId: string }) {
                               <button
                                 type="button"
                                 disabled={working}
-                                onClick={() => void openSubmission(attempt.id)}
+                                onClick={() => openSubmission(attempt.id)}
                               >
                                 Переглянути
                               </button>
@@ -357,7 +252,10 @@ function StatisticsWorkspace({ userId }: { userId: string }) {
             <div className="ts-panel">
               <div className="ts-details-heading">
                 <h3>Деталі проходження</h3>
-                <button type="button" onClick={() => setDetails(null)}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedSubmissionId(null)}
+                >
                   Закрити
                 </button>
               </div>
