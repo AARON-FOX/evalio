@@ -175,12 +175,31 @@ export function TestRunnerPage() {
   if (loading)
     return <div className={styles.loading}>Завантаження спроби…</div>;
   if (!attempt) {
+    const attemptsOver =
+      /ліміт спроб|attempt_limit_reached|спроби вичерпано/i.test(error);
     return (
-      <div className={styles.loading}>
-        <Alert tone="error" title="Не вдалося почати тест">
-          {error || "Спроба недоступна."}
-        </Alert>
-        <Link to="/tests">Повернутися до тестів</Link>
+      <div className={styles.unavailablePage}>
+        <Card className={styles.unavailableCard} elevated>
+          <ShieldCheck
+            size={38}
+            color="var(--color-secondary)"
+            aria-hidden="true"
+          />
+          <h1>
+            {attemptsOver
+              ? "Ліміт спроб вичерпано"
+              : "Не вдалося відкрити спробу"}
+          </h1>
+          <p>
+            {attemptsOver
+              ? "Усі дозволені спроби використано. Можна переглянути попередні результати або інформацію про тест."
+              : error || "Ця спроба зараз недоступна."}
+          </p>
+          <div className={styles.unavailableActions}>
+            {testId && <Link to={`/tests/${testId}`}>Інформація про тест</Link>}
+            <Link to="/results">Мої результати</Link>
+          </div>
+        </Card>
       </div>
     );
   }

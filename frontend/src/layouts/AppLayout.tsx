@@ -101,7 +101,7 @@ export function AppLayout() {
         </nav>
 
         <div className={styles.sidebarBottom}>
-          <div className={styles.supportCard}>
+          <Link to="/help" className={styles.supportCard}>
             {isAdmin ? (
               <ShieldCheck size={20} aria-hidden="true" />
             ) : (
@@ -109,7 +109,7 @@ export function AppLayout() {
             )}
             <strong>Потрібна допомога?</strong>
             <span>Поради та відповіді щодо роботи з Evalio.</span>
-          </div>
+          </Link>
           <span className={styles.copyright}>© 2026 Evalio</span>
         </div>
       </aside>
@@ -129,7 +129,14 @@ export function AppLayout() {
             </Link>
           </div>
           <div className={styles.breadcrumb}>
-            Навчальний простір / {activeItem?.label ?? "Огляд"}
+            Навчальний простір /{" "}
+            {location.pathname === "/help"
+              ? "Допомога"
+              : location.pathname === "/privacy"
+                ? "Конфіденційність"
+                : location.pathname === "/terms"
+                  ? "Умови використання"
+                  : (activeItem?.label ?? "Огляд")}
           </div>
           <div className={styles.account}>
             <div className={styles.avatar} aria-hidden="true">

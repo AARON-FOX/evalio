@@ -66,3 +66,18 @@
   max-height: 4.5em;
   margin: 0;
 }
+
+.availability {
+  display: grid;
+  gap: 4px;
+  padding: 9px 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+.availability strong {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.availability span {
+  line-height: 1.45;
+}

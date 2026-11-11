@@ -20,6 +20,7 @@ export interface TeacherRecentSubmission {
   testId: string;
   testTitle: string;
   respondentId: string;
+  respondentEmail?: string | null;
   score: number | null;
   maxScore: number | null;
   submittedAt: string;
@@ -52,7 +53,7 @@ export interface StudentRecentSubmission {
   id: string;
   testId: string;
   testTitle: string;
-  kind: 'test' | 'survey';
+  kind: "test" | "survey";
   resultVisible: boolean;
   score: number | null;
   maxScore: number | null;

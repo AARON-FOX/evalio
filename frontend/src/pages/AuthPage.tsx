@@ -252,9 +252,9 @@ export function AuthPage({ mode }: AuthPageProps) {
     <div className={styles.shell}>
       <header className={styles.header}>
         <Brand />
-        <span className={styles.headerHelp}>
+        <Link to="/help" className={styles.headerHelp}>
           Потрібна допомога? <ArrowUpRight size={14} aria-hidden="true" />
-        </span>
+        </Link>
       </header>
 
       <main className={styles.main}>
@@ -326,8 +326,21 @@ export function AuthPage({ mode }: AuthPageProps) {
                   required
                 />
                 <span>
-                  Погоджуюся з Умовами використання та Політикою
-                  конфіденційності.
+                  Погоджуюся з{" "}
+                  <Link
+                    to="/terms"
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    Умовами використання
+                  </Link>{" "}
+                  та{" "}
+                  <Link
+                    to="/privacy"
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    Політикою конфіденційності
+                  </Link>
+                  .
                 </span>
               </label>
             )}
@@ -374,7 +387,7 @@ export function AuthPage({ mode }: AuthPageProps) {
 
       <footer className={styles.footer}>
         <span>© {new Date().getFullYear()} Evalio</span>
-        <span>Конфіденційність</span>
+        <Link to="/privacy">Конфіденційність</Link>
       </footer>
     </div>
   );

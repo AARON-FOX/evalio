@@ -91,6 +91,48 @@ testsRouter.get("/", async (req, res) => {
     return;
   }
 
+  if (req.authUser!.role === "respondent") {
+    const [countsResult, activeResult] = await Promise.all([
+      supabaseAdmin.rpc("evalio_respondent_attempt_counts", {
+        p_respondent_id: userId,
+      }),
+      supabaseAdmin
+        .from("active_attempts")
+        .select("series_id")
+        .eq("respondent_id", userId)
+        .eq("status", "active"),
+    ]);
+    if (countsResult.error || activeResult.error) {
+      databaseError(res, countsResult.error ?? activeResult.error);
+      return;
+    }
+    const counts = new Map<string, number>(
+      (countsResult.data ?? []).map(
+        (row: { series_id: string; used_attempts: number }) => [
+          row.series_id,
+          Number(row.used_attempts),
+        ],
+      ),
+    );
+    const activeSeries = new Set(
+      (activeResult.data ?? []).map((row) => row.series_id),
+    );
+    res.json(
+      (data ?? []).map((test) => {
+        const usedAttempts = counts.get(test.series_id) ?? 0;
+        return {
+          ...test,
+          usedAttempts,
+          remainingAttempts:
+            test.max_attempts == null
+              ? null
+              : Math.max(0, test.max_attempts - usedAttempts),
+          hasActiveAttempt: activeSeries.has(test.series_id),
+        };
+      }),
+    );
+    return;
+  }
   res.json(data ?? []);
 });
 

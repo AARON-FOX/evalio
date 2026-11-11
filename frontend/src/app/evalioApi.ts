@@ -20,6 +20,7 @@ import type {
   WeightedQuestionInput,
 } from "../services/testVersioningApi";
 import type { RunnerState, RunnerResult } from "../services/activeAttemptsApi";
+import type { TestOverview } from "../services/testOverviewTypes";
 import type { SubmissionHistory } from "../services/submissionsApi";
 import type { SubmissionDetail } from "../services/submissionResultApi";
 import type { CreateTestInput, TestRecord } from "../services/testsApi";
@@ -71,6 +72,7 @@ export const evalioApi = createApi({
     "RunnerAttempt",
     "AdminUsers",
     "AdminAudit",
+    "TestOverview",
   ],
   keepUnusedDataFor: 30,
   refetchOnFocus: true,
@@ -95,6 +97,10 @@ export const evalioApi = createApi({
       }),
       invalidatesTags: (_result, error) =>
         error ? [] : ["AdminUsers", "AdminAudit"],
+    }),
+    getTestOverview: builder.query<TestOverview, string>({
+      query: (id) => `/api/tests/${encodeURIComponent(id)}/overview`,
+      providesTags: (_result, _error, id) => [{ type: "TestOverview", id }],
     }),
     getCatalog: builder.query<CatalogTest[], void>({
       query: () => "/api/tests",
@@ -322,6 +328,7 @@ export const evalioApi = createApi({
               "StudentDashboard",
               "TeacherDashboard",
               "SubmissionHistory",
+              "TestOverview",
               "TeacherStatistics",
               { type: "RunnerAttempt", id: attemptId },
             ],
@@ -334,6 +341,7 @@ export const {
   useGetAdminAuditQuery,
   useChangeUserRoleMutation,
   useGetCatalogQuery,
+  useGetTestOverviewQuery,
   useGetStudentDashboardQuery,
   useGetTeacherDashboardQuery,
   useGetTeacherTestsQuery,

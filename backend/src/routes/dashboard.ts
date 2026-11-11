@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 
 import { supabaseAdmin } from "../lib/supabaseAdmin.js";
+import { attachRespondentEmails } from "../lib/respondentEmails.js";
 import {
   requireAuth,
   requireCreator,
@@ -35,6 +36,17 @@ dashboardRouter.get("/teacher", requireCreator, async (req, res) => {
   if (error) {
     console.error("Teacher dashboard:", error);
     res.status(502).json({ message: "Could not load dashboard" });
+    return;
+  }
+  // Only the verified creator receives participants' emails for own tests.
+  const result = data as {
+    recentSubmissions?: Array<{ respondentId: string }>;
+  } | null;
+  if (result && Array.isArray(result.recentSubmissions)) {
+    res.json({
+      ...result,
+      recentSubmissions: await attachRespondentEmails(result.recentSubmissions),
+    });
     return;
   }
   res.json(data);

@@ -41,9 +41,26 @@ export function StudentTestsPage() {
                 <small>
                   {[test.subject, test.class_group].filter(Boolean).join(" · ")}
                 </small>
+                <div className={styles.availability}>
+                  <strong>
+                    {test.max_attempts == null
+                      ? `Спроби: ${test.usedAttempts ?? 0} використано · без обмежень`
+                      : `Спроби: ${test.usedAttempts ?? 0} з ${test.max_attempts} · залишилось ${test.remainingAttempts ?? test.max_attempts}`}
+                  </strong>
+                  {test.hasActiveAttempt && <span>Є активна спроба</span>}
+                  {!test.hasActiveAttempt && test.remainingAttempts === 0 && (
+                    <span>Ліміт вичерпано — результати збережені</span>
+                  )}
+                  {test.available_until && (
+                    <span>
+                      Доступний до:{" "}
+                      {new Date(test.available_until).toLocaleString("uk-UA")}
+                    </span>
+                  )}
+                </div>
               </div>
               <Link to={`/tests/${test.id}`} className={styles.open}>
-                {test.kind === "survey" ? "Відкрити опитування" : "Почати тест"}
+                Перейти до тесту
               </Link>
             </Card>
           ))}

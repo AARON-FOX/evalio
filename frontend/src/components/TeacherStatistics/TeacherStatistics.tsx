@@ -213,7 +213,10 @@ function StatisticsWorkspace() {
                       <tbody>
                         {statistics.recentSubmissions.map((attempt) => (
                           <tr key={attempt.id}>
-                            <td>{shortId(attempt.respondentId)}</td>
+                            <td>
+                              {attempt.respondentEmail ||
+                                `Учасник ${shortId(attempt.respondentId)}`}
+                            </td>
 
                             <td>{formatDate(attempt.submittedAt)}</td>
 
@@ -260,7 +263,11 @@ function StatisticsWorkspace() {
                 </button>
               </div>
 
-              <p>Студент: {shortId(details.respondentId)}</p>
+              <p>
+                Студент:{" "}
+                {details.respondentEmail ||
+                  `Учасник ${shortId(details.respondentId)}`}
+              </p>
 
               <p>Дата: {formatDate(details.submittedAt)}</p>
 

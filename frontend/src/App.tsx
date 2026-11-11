@@ -17,6 +17,8 @@ import { TestEditorPage } from "./pages/TestEditorPage";
 import { StudentTestsPage } from "./pages/StudentTestsPage";
 import { TestRunnerPage } from "./pages/TestRunnerPage";
 import { AdminUsersPage } from "./pages/AdminUsersPage";
+import { HelpPage, PrivacyPage, TermsPage } from "./pages/InformationPages";
+import { TestOverviewPage } from "./pages/TestOverviewPage";
 
 import { TeacherStatistics } from "./components/TeacherStatistics/TeacherStatistics";
 
@@ -27,6 +29,11 @@ function App() {
     <Routes>
       {/* Default route */}
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+      {/* Informational pages for guests and authenticated users */}
+      <Route path="/help" element={<HelpPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
 
       {/* Public routes */}
       <Route element={<GuestRoute />}>
@@ -44,6 +51,7 @@ function App() {
           {/* Student routes */}
           <Route element={<RoleRoute allowedRole="respondent" />}>
             <Route path="/tests" element={<StudentTestsPage />} />
+            <Route path="/tests/:testId" element={<TestOverviewPage />} />
 
             <Route path="/results" element={<StudentResultsPage />} />
             <Route
@@ -72,7 +80,7 @@ function App() {
 
         {/* Test Runner without AppLayout */}
         <Route element={<RoleRoute allowedRole="respondent" />}>
-          <Route path="/tests/:testId" element={<TestRunnerPage />} />
+          <Route path="/tests/:testId/run" element={<TestRunnerPage />} />
         </Route>
       </Route>
 

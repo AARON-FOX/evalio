@@ -53,6 +53,11 @@ export interface CatalogTest {
   kind: "test" | "survey";
   subject?: string | null;
   class_group?: string | null;
+  max_attempts?: number | null;
+  available_until?: string | null;
+  usedAttempts?: number;
+  remainingAttempts?: number | null;
+  hasActiveAttempt?: boolean;
 }
 
 async function request<T>(
