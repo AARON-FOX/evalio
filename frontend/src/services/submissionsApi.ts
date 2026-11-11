@@ -1,3 +1,4 @@
+import { invalidateStudentProgress } from "../app/cacheInvalidation";
 import { supabase } from "../lib/supabase";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -10,7 +11,7 @@ export interface SelectedAnswer {
 export interface SubmissionResult {
   id: string;
   testId: string;
-  kind: 'test' | 'survey';
+  kind: "test" | "survey";
   resultVisible: boolean;
   score: number | null;
   maxScore: number | null;
@@ -20,7 +21,7 @@ export interface SubmissionResult {
 export interface SubmissionHistory {
   id: string;
   test_id: string;
-  kind: 'test' | 'survey' | null;
+  kind: "test" | "survey" | null;
   result_visible: boolean;
   score: number | null;
   max_score: number | null;
@@ -82,7 +83,10 @@ export function submitTest(testId: string, answers: SelectedAnswer[]) {
       method: "POST",
       body: { answers },
     },
-  );
+  ).then((result) => {
+    invalidateStudentProgress();
+    return result;
+  });
 }
 
 export function getMySubmissions() {

@@ -1,3 +1,7 @@
+import {
+  invalidateTeacherData,
+  invalidateTestPublication,
+} from "../app/cacheInvalidation";
 import { supabase } from "../lib/supabase";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -109,7 +113,10 @@ export function getTestDetails(id: string) {
 
 // POST /api/tests
 export function createTest(input: CreateTestInput) {
-  return apiRequest<TestRecord>("/api/tests", "POST", input);
+  return apiRequest<TestRecord>("/api/tests", "POST", input).then((result) => {
+    invalidateTeacherData();
+    return result;
+  });
 }
 
 // PATCH /api/tests/:id
@@ -124,7 +131,10 @@ export function updateTest(
     `/api/tests/${encodeURIComponent(id)}`,
     "PATCH",
     input,
-  );
+  ).then((result) => {
+    invalidateTeacherData();
+    return result;
+  });
 }
 
 // POST /api/tests/:id/questions
@@ -133,7 +143,10 @@ export function addTestQuestion(id: string, input: AddQuestionInput) {
     `/api/tests/${encodeURIComponent(id)}/questions`,
     "POST",
     input,
-  );
+  ).then((result) => {
+    invalidateTeacherData();
+    return result;
+  });
 }
 
 // POST /api/tests/:id/publish
@@ -142,5 +155,8 @@ export function publishTest(id: string) {
     id: string;
     status: "published";
     message: string;
-  }>(`/api/tests/${encodeURIComponent(id)}/publish`, "POST");
+  }>(`/api/tests/${encodeURIComponent(id)}/publish`, "POST").then((result) => {
+    invalidateTestPublication();
+    return result;
+  });
 }

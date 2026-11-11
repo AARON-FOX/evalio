@@ -18,12 +18,7 @@ import {
 import { Button } from "../components/ui/Button/Button";
 import { Card } from "../components/ui/Card/Card";
 import { Alert } from "../components/ui/Alert/Alert";
-import {
-  createTest,
-  getTestDetails,
-  publishTest,
-  updateTest,
-} from "../services/testsApi";
+import { getTestDetails, updateTest } from "../services/testsApi";
 
 import type { TestDetails, TestKind, TestQuestion } from "../services/testsApi";
 
@@ -53,6 +48,11 @@ import type {
 } from "../services/questionEditorApi";
 
 import { ConfirmDialog } from "../components/ui/ConfirmDialog/ConfirmDialog";
+import {
+  useCreateTestMutation,
+  usePublishTestMutation,
+} from "../app/evalioApi";
+import { queryErrorMessage } from "../app/queryError";
 
 import styles from "./TestEditorPage.module.scss";
 
@@ -115,7 +115,7 @@ function pointsOf(question: TestQuestion): number {
     : 1;
 }
 function errorText(error: unknown): string {
-  return error instanceof Error ? error.message : "Сталася невідома помилка.";
+  return queryErrorMessage(error);
 }
 function pad(value: number): string {
   return String(value).padStart(2, "0");
@@ -261,6 +261,7 @@ export function TestEditorPage() {
 
 function CreateTestPage() {
   const navigate = useNavigate();
+  const [createTest] = useCreateTestMutation();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [kind, setKind] = useState<TestKind>("test");
@@ -278,7 +279,7 @@ function CreateTestPage() {
         title: title.trim(),
         description: description.trim() || null,
         kind,
-      });
+      }).unwrap();
       draftId = draft.id;
       setCreatedId(draft.id);
       // Unlike legacy tests, new tests start with one attempt by default.
@@ -379,6 +380,7 @@ function CreateTestPage() {
 }
 
 function ExistingTestEditor({ testId }: { testId: string }) {
+  const [publishTest] = usePublishTestMutation();
   const navigate = useNavigate();
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [loadError, setLoadError] = useState("");
@@ -633,7 +635,7 @@ function ExistingTestEditor({ testId }: { testId: string }) {
     setBusy(true);
     setActionError("");
     try {
-      await publishTest(testId);
+      await publishTest(testId).unwrap();
       const [settings, versions, published] = await Promise.all([
         getTestSettings(testId),
         getVersions(testId),

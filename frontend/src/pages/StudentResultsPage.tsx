@@ -1,46 +1,35 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { CheckCircle2 } from "lucide-react";
 import { Card } from "../components/ui/Card/Card";
 import { Alert } from "../components/ui/Alert/Alert";
-import {
-  getMySubmissions,
-  type SubmissionHistory,
-} from "../services/submissionsApi";
-import { getTests } from "../services/testsApi";
+import { useGetMySubmissionsQuery, useGetCatalogQuery } from "../app/evalioApi";
+import { queryErrorMessage } from "../app/queryError";
 import styles from "./StudentResultsPage.module.scss";
 
-interface ResultsSnapshot {
-  items: SubmissionHistory[];
-  titles: Map<string, string>;
-}
-
 export function StudentResultsPage() {
-  const [snapshot, setSnapshot] = useState<ResultsSnapshot | null>(null);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    let active = true;
-    void Promise.all([getMySubmissions(), getTests()])
-      .then(([items, tests]) => {
-        if (!active) return;
-        setSnapshot({
+  const {
+    data: items,
+    isLoading: loadingHistory,
+    error: historyError,
+  } = useGetMySubmissionsQuery();
+  const {
+    data: tests,
+    isLoading: loadingCatalog,
+    error: catalogError,
+  } = useGetCatalogQuery();
+  const error = historyError
+    ? queryErrorMessage(historyError)
+    : catalogError
+      ? queryErrorMessage(catalogError)
+      : "";
+  const snapshot =
+    items && tests
+      ? {
           items,
           titles: new Map(tests.map((test) => [test.id, test.title])),
-        });
-      })
-      .catch((err: unknown) => {
-        if (active)
-          setError(
-            err instanceof Error
-              ? err.message
-              : "Не вдалося завантажити результати",
-          );
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
+        }
+      : null;
+  const loading = loadingHistory || loadingCatalog;
 
   return (
     <section className={styles.page}>
@@ -57,7 +46,7 @@ export function StudentResultsPage() {
         </Alert>
       )}
 
-      {!snapshot && !error && <p>Завантаження результатів…</p>}
+      {loading && <p>Завантаження результатів…</p>}
 
       {snapshot && (
         <Card className={styles.card}>

@@ -1,3 +1,4 @@
+import { invalidateTeacherData } from "../app/cacheInvalidation";
 import { supabase } from "../lib/supabase";
 import type { AddQuestionInput, TestDetails } from "./testsApi";
 
@@ -75,12 +76,18 @@ export function updateDraftQuestion(
     `/api/tests/${encodeURIComponent(testId)}/questions/${encodeURIComponent(questionId)}`,
     "PATCH",
     input,
-  );
+  ).then((result) => {
+    invalidateTeacherData();
+    return result;
+  });
 }
 
 export function deleteDraftQuestion(testId: string, questionId: string) {
   return request<null>(
     `/api/tests/${encodeURIComponent(testId)}/questions/${encodeURIComponent(questionId)}`,
     "DELETE",
-  );
+  ).then((result) => {
+    invalidateTeacherData();
+    return result;
+  });
 }
