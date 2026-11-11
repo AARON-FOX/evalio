@@ -35,7 +35,10 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
       throw profileError;
     }
 
-    if (!profile || !["creator", "respondent"].includes(profile.role)) {
+    if (
+      !profile ||
+      !["creator", "respondent", "admin"].includes(profile.role)
+    ) {
       res.status(403).json({
         message: "User profile is not available",
       });
@@ -44,7 +47,7 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
 
     req.authUser = {
       id: data.user.id,
-      role: profile.role as "creator" | "respondent",
+      role: profile.role as "creator" | "respondent" | "admin",
     };
 
     next();
@@ -72,5 +75,13 @@ export const requireRespondent: RequestHandler = (req, res, next) => {
     return;
   }
 
+  next();
+};
+
+export const requireAdmin: RequestHandler = (req, res, next) => {
+  if (req.authUser?.role !== "admin") {
+    res.status(403).json({ message: "Admin role required" });
+    return;
+  }
   next();
 };

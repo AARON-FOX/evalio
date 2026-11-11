@@ -5,7 +5,7 @@ declare global {
     interface Request {
       authUser?: {
         id: string;
-        role: "creator" | "respondent";
+        role: "creator" | "respondent" | "admin";
       };
     }
   }

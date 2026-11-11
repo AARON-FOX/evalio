@@ -1,0 +1,35 @@
+-- ONLY run MANUALLY in Supabase SQL Editor AFTER migration 014.
+-- Replace the placeholder with the EMAIL of an existing verified Evalio user.
+-- Never grant 'admin' through a browser API or public signup.
+DO $$
+DECLARE
+  v_email TEXT := 'REPLACE_WITH_EXISTING_USER_EMAIL';
+  v_user_id UUID;
+BEGIN
+  IF v_email = 'REPLACE_WITH_EXISTING_USER_EMAIL' THEN
+    RAISE EXCEPTION 'Replace the placeholder email first';
+  END IF;
+
+  SELECT id INTO STRICT v_user_id
+  FROM auth.users
+  WHERE LOWER(email) = LOWER(v_email);
+
+  UPDATE public.profiles SET role = 'admin' WHERE id = v_user_id;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'The selected user has no profile';
+  END IF;
+  RAISE NOTICE 'Admin role assigned to user %', v_user_id;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    RAISE EXCEPTION 'No Auth user with the specified email exists';
+  WHEN TOO_MANY_ROWS THEN
+    RAISE EXCEPTION 'More than one user matched the email';
+END;
+$$;
+
+-- Verification: only reveal the intended email and its newly assigned role.
+-- Replace the placeholder here too.
+SELECT u.email, p.role
+FROM auth.users u
+JOIN public.profiles p ON p.id = u.id
+WHERE LOWER(u.email) = LOWER('REPLACE_WITH_EXISTING_USER_EMAIL');

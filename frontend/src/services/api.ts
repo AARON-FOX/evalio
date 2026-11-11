@@ -46,7 +46,7 @@ export async function getDatabaseHealth(
 export interface CurrentUserResponse {
   id: string;
   email: string | null;
-  role: "respondent" | "creator";
+  role: "respondent" | "creator" | "admin";
 }
 
 export async function getCurrentUser(
