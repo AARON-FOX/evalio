@@ -8,7 +8,13 @@ export interface RunnerQuestion {
   text: string;
   questionType: "single_choice" | "multiple_choice";
   points: number;
-  options: { id: string; text: string }[];
+  imageUrl?: string | null;
+  options: {
+    id: string;
+    text: string;
+    imageUrl?: string | null;
+    imageOnly?: boolean;
+  }[];
 }
 
 export interface RunnerResult {

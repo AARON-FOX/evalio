@@ -15,6 +15,7 @@ import { submissionResultRouter } from "./routes/submissionResult.js";
 import { adminRouter } from "./routes/admin.js";
 import { testOverviewRouter } from "./routes/testOverview.js";
 import { testArchiveRouter } from "./routes/testArchive.js";
+import { testMediaRouter } from "./routes/testMedia.js";
 
 const app = express();
 
@@ -142,6 +143,7 @@ app.get("/api/me", async (req, res) => {
 
 app.use("/api/tests", legacySubmissionGuard);
 
+app.use("/api/tests", testMediaRouter);
 app.use("/api/tests", testArchiveRouter);
 app.use("/api/tests", testOverviewRouter);
 app.use("/api/tests", testsRouter);

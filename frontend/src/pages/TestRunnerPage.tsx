@@ -320,6 +320,13 @@ export function TestRunnerPage() {
               {active.kind === "test" && <span>{question.points} балів</span>}
             </div>
             <h2>{question.text}</h2>
+            {question.imageUrl && (
+              <img
+                className={styles.questionImage}
+                src={question.imageUrl}
+                alt={`Ілюстрація до питання: ${question.text}`}
+              />
+            )}
             <p className={styles.instruction}>
               {question.questionType === "single_choice"
                 ? "Оберіть один варіант відповіді."
@@ -335,7 +342,24 @@ export function TestRunnerPage() {
                       : "checkbox"
                   }
                   name={`answer-${question.id}`}
-                  label={option.text}
+                  label={
+                    option.imageUrl ? (
+                      <span className={styles.optionWithImage}>
+                        {!option.imageOnly && <span>{option.text}</span>}
+                        <img
+                          className={styles.optionImage}
+                          src={option.imageUrl}
+                          alt={
+                            option.imageOnly
+                              ? `Зображення відповіді: ${option.text}`
+                              : `Ілюстрація до варіанта ${option.text}`
+                          }
+                        />
+                      </span>
+                    ) : (
+                      option.text
+                    )
+                  }
                   checked={(answers[question.id] ?? []).includes(option.id)}
                   disabled={saving || finishing || remainingMs === 0}
                   onChange={() => void changeAnswer(option.id)}

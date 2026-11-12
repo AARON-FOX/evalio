@@ -4,6 +4,10 @@ import { z } from "zod";
 import { supabaseAdmin } from "../lib/supabaseAdmin.js";
 import { requireAuth, requireCreator } from "../middleware/requireAuth.js";
 import { addQuestionSchema } from "../schemas/testSchemas.js";
+import {
+  verifyImageReferences,
+  withSignedQuestionImages,
+} from "../lib/testMedia.js";
 
 export const questionEditorRouter = Router();
 questionEditorRouter.use(requireAuth, requireCreator);
@@ -38,6 +42,7 @@ function reportEditError(res: Response, error: { message: string }): boolean {
       "invalid_correct_answers",
       "survey_has_correct_answers",
       "invalid_question_metadata",
+      "invalid_media_owner",
     ].some((name) => code.includes(name))
   ) {
     res.status(400).json({ message: code });
@@ -76,7 +81,9 @@ questionEditorRouter.get("/:id/editor", async (req, res) => {
 
   const { data: questions, error: questionsError } = await supabaseAdmin
     .from("questions")
-    .select("id, text, question_type, position, points, explanation")
+    .select(
+      "id, text, question_type, position, points, explanation, image_path",
+    )
     .eq("test_id", test.id)
     .order("position", { ascending: true });
   if (questionsError) {
@@ -92,7 +99,7 @@ questionEditorRouter.get("/:id/editor", async (req, res) => {
 
   const { data: options, error: optionsError } = await supabaseAdmin
     .from("options")
-    .select("id, question_id, text, position")
+    .select("id, question_id, text, position, image_path, image_only")
     .in("question_id", questionIds)
     .order("position", { ascending: true });
   if (optionsError) {
@@ -114,20 +121,27 @@ questionEditorRouter.get("/:id/editor", async (req, res) => {
     correctIds = new Set((correct ?? []).map((item) => item.option_id));
   }
 
-  res.json({
-    ...test,
-    questions: (questions ?? []).map((question) => ({
-      ...question,
-      options: (options ?? [])
-        .filter((option) => option.question_id === question.id)
-        .map((option) => ({
-          id: option.id,
-          text: option.text,
-          position: option.position,
-          isCorrect: correctIds.has(option.id),
-        })),
-    })),
-  });
+  const editableQuestions = (questions ?? []).map((question) => ({
+    ...question,
+    options: (options ?? [])
+      .filter((option) => option.question_id === question.id)
+      .map((option) => ({
+        id: option.id,
+        text: option.text,
+        position: option.position,
+        image_path: option.image_path,
+        image_only: option.image_only,
+        isCorrect: correctIds.has(option.id),
+      })),
+  }));
+  try {
+    res.json({
+      ...test,
+      questions: await withSignedQuestionImages(editableQuestions),
+    });
+  } catch (error) {
+    reportDbError(res, error);
+  }
 });
 
 // PATCH /api/tests/:id/questions/:questionId
@@ -143,16 +157,34 @@ questionEditorRouter.patch("/:id/questions/:questionId", async (req, res) => {
     return;
   }
 
-  const { data, error } = await supabaseAdmin.rpc("evalio_update_question_v2", {
-    p_test_id: testId.data,
-    p_creator_id: req.authUser!.id,
-    p_question_id: questionId.data,
-    p_text: input.data.text,
-    p_question_type: input.data.questionType,
-    p_options: input.data.options,
-    p_points: input.data.points,
-    p_explanation: input.data.explanation,
-  });
+  try {
+    await verifyImageReferences(
+      [input.data.imagePath, ...input.data.options.map((o) => o.imagePath)],
+      req.authUser!.id,
+    );
+  } catch (error) {
+    res
+      .status(400)
+      .json({
+        message: error instanceof Error ? error.message : "invalid_media",
+      });
+    return;
+  }
+
+  const { data, error } = await supabaseAdmin.rpc(
+    "evalio_update_question_media",
+    {
+      p_image_path: input.data.imagePath ?? null,
+      p_test_id: testId.data,
+      p_creator_id: req.authUser!.id,
+      p_question_id: questionId.data,
+      p_text: input.data.text,
+      p_question_type: input.data.questionType,
+      p_options: input.data.options,
+      p_points: input.data.points,
+      p_explanation: input.data.explanation,
+    },
+  );
 
   if (error) {
     if (!reportEditError(res, error)) reportDbError(res, error);

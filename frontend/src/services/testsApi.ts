@@ -29,6 +29,8 @@ export interface AnswerOption {
   id: string;
   text: string;
   position: number;
+  imageUrl?: string | null;
+  imageOnly?: boolean;
 }
 
 export interface TestQuestion {
@@ -36,6 +38,7 @@ export interface TestQuestion {
   text: string;
   question_type: QuestionType;
   position: number;
+  imageUrl?: string | null;
   options: AnswerOption[];
 }
 

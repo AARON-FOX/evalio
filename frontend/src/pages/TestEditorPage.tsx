@@ -12,6 +12,7 @@ import {
   Plus,
   Send,
   Trash2,
+  ImagePlus,
   X,
 } from "lucide-react";
 
@@ -47,12 +48,21 @@ import {
   useDeleteDraftQuestionMutation,
 } from "../app/evalioApi";
 import { queryErrorMessage } from "../app/queryError";
+import { uploadTestImage } from "../services/testImageApi";
 
 import styles from "./TestEditorPage.module.scss";
 
 type ChoiceKind = "single_choice" | "multiple_choice";
-type QuestionOption = { key: string; text: string; isCorrect: boolean };
+type QuestionOption = {
+  key: string;
+  text: string;
+  isCorrect: boolean;
+  imagePath: string | null;
+  imageUrl: string | null;
+};
 type QuestionForm = {
+  imagePath: string | null;
+  imageUrl: string | null;
   text: string;
   questionType: ChoiceKind;
   points: number;
@@ -82,8 +92,12 @@ const blankOption = (): QuestionOption => ({
   key: crypto.randomUUID(),
   text: "",
   isCorrect: false,
+  imagePath: null,
+  imageUrl: null,
 });
 const newQuestion = (): QuestionForm => ({
+  imagePath: null,
+  imageUrl: null,
   text: "",
   questionType: "single_choice",
   points: 1,
@@ -92,14 +106,18 @@ const newQuestion = (): QuestionForm => ({
 });
 function questionFromSaved(question: EditableQuestion): QuestionForm {
   return {
+    imagePath: question.image_path ?? null,
+    imageUrl: question.imageUrl ?? null,
     text: question.text,
     questionType: question.question_type,
     points: question.points,
     explanation: question.explanation ?? "",
     options: question.options.map((option) => ({
       key: option.id,
-      text: option.text,
+      text: option.imageOnly ? "" : option.text,
       isCorrect: option.isCorrect,
+      imagePath: option.image_path ?? null,
+      imageUrl: option.imageUrl ?? null,
     })),
   };
 }
@@ -179,9 +197,12 @@ function questionPayload(
   kind: TestKind,
 ): WeightedQuestionInput {
   const text = question.text.trim();
-  const options = question.options.map((option) => ({
-    text: option.text.trim(),
+  const options = question.options.map((option, index) => ({
+    text:
+      option.text.trim() || (option.imagePath ? `Варіант ${index + 1}` : ""),
     isCorrect: kind === "test" && option.isCorrect,
+    imagePath: option.imagePath,
+    imageOnly: !!option.imagePath && !option.text.trim(),
   }));
   const correct = options.filter((option) => option.isCorrect).length;
   if (!text) throw new Error("Введи текст питання.");
@@ -222,8 +243,55 @@ function questionPayload(
     questionType: question.questionType,
     points: question.points,
     explanation: question.explanation.trim() || null,
+    imagePath: question.imagePath,
     options,
   };
+}
+
+function MediaField({
+  url,
+  label,
+  disabled,
+  onFile,
+  onRemove,
+}: {
+  url: string | null;
+  label: string;
+  disabled: boolean;
+  onFile: (file: File) => void;
+  onRemove: () => void;
+}) {
+  return (
+    <div className={styles.mediaField}>
+      {url && <img src={url} alt={label} className={styles.editorImage} />}
+      <div className={styles.mediaActions}>
+        <label className={styles.fileButton}>
+          <ImagePlus size={16} aria-hidden="true" />{" "}
+          {url ? "Замінити зображення" : "Додати зображення"}
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            disabled={disabled}
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) onFile(file);
+              event.target.value = "";
+            }}
+          />
+        </label>
+        {url && (
+          <button
+            type="button"
+            className={styles.removeImage}
+            disabled={disabled}
+            onClick={onRemove}
+          >
+            Прибрати
+          </button>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function Field({
@@ -473,6 +541,7 @@ function ExistingTestEditor({ testId }: { testId: string }) {
     setNotice("");
   }
   function selectQuestion(nextId: string | null) {
+    if (busy) return;
     if (
       questionDirty &&
       !window.confirm("Є незбережені зміни питання. Перейти без збереження?")
@@ -487,6 +556,21 @@ function ExistingTestEditor({ testId }: { testId: string }) {
     setActionError("");
     setNotice("");
   }
+  async function uploadMedia(file: File, optionKey?: string) {
+    if (busy) return;
+    setBusy(true);
+    setActionError("");
+    try {
+      const uploaded = await uploadTestImage(testId, file);
+      if (optionKey) updateOption(optionKey, uploaded);
+      else updateQuestion(uploaded);
+    } catch (error) {
+      setActionError(errorText(error));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function updateOption(key: string, patch: Partial<QuestionOption>) {
     updateQuestion({
       options: question.options.map((option) =>
@@ -818,9 +902,25 @@ function ExistingTestEditor({ testId }: { testId: string }) {
                   {index + 1}. {item.text}
                 </strong>
                 <span>{pointsOf(item)} бал.</span>
+                {item.imageUrl && (
+                  <img
+                    className={styles.previewImage}
+                    src={item.imageUrl}
+                    alt={`Ілюстрація до запитання ${index + 1}`}
+                  />
+                )}
                 <ol>
                   {item.options.map((option) => (
-                    <li key={option.id}>{option.text}</li>
+                    <li key={option.id}>
+                      {!option.imageOnly && option.text}
+                      {option.imageUrl && (
+                        <img
+                          className={styles.previewImage}
+                          src={option.imageUrl}
+                          alt={option.text || "Зображення відповіді"}
+                        />
+                      )}
+                    </li>
                   ))}
                 </ol>
               </div>
@@ -991,6 +1091,20 @@ function ExistingTestEditor({ testId }: { testId: string }) {
                     }
                   />
                 </Field>
+                <div className={styles.mediaSection}>
+                  <strong>Зображення до запитання (необов’язково)</strong>
+                  <MediaField
+                    url={question.imageUrl}
+                    label="Зображення до запитання"
+                    disabled={busy}
+                    onFile={(file) => {
+                      void uploadMedia(file);
+                    }}
+                    onRemove={() =>
+                      updateQuestion({ imagePath: null, imageUrl: null })
+                    }
+                  />
+                </div>
                 <div className={styles.twoColumns}>
                   <Field label="Тип запитання">
                     <select
@@ -1070,6 +1184,20 @@ function ExistingTestEditor({ testId }: { testId: string }) {
                         value={option.text}
                         onChange={(event: ChangeEvent<HTMLInputElement>) =>
                           updateOption(option.key, { text: event.target.value })
+                        }
+                      />
+                      <MediaField
+                        url={option.imageUrl}
+                        label={`Зображення варіанта ${index + 1}`}
+                        disabled={busy}
+                        onFile={(file) => {
+                          void uploadMedia(file, option.key);
+                        }}
+                        onRemove={() =>
+                          updateOption(option.key, {
+                            imagePath: null,
+                            imageUrl: null,
+                          })
                         }
                       />
                       <button
@@ -1283,9 +1411,25 @@ function ExistingTestEditor({ testId }: { testId: string }) {
                     {index + 1}. {item.text}
                   </strong>
                   <span>{item.points} бал.</span>
+                  {item.imageUrl && (
+                    <img
+                      className={styles.previewImage}
+                      src={item.imageUrl}
+                      alt={`Ілюстрація до запитання ${index + 1}`}
+                    />
+                  )}
                   <ul>
                     {item.options.map((option) => (
-                      <li key={option.id}>{option.text}</li>
+                      <li key={option.id}>
+                        {!option.imageOnly && option.text}
+                        {option.imageUrl && (
+                          <img
+                            className={styles.previewImage}
+                            src={option.imageUrl}
+                            alt={option.text || "Зображення відповіді"}
+                          />
+                        )}
+                      </li>
                     ))}
                   </ul>
                 </div>

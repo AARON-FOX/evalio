@@ -1,5 +1,6 @@
 import { Router, type Response } from "express";
 import { z } from "zod";
+import { withSignedQuestionImages } from "../lib/testMedia.js";
 
 import { supabaseAdmin } from "../lib/supabaseAdmin.js";
 import { requireAuth, requireRespondent } from "../middleware/requireAuth.js";
@@ -15,6 +16,9 @@ type AnswerOption = {
   id: string;
   text: string;
   position: number;
+  image_path: string | null;
+  image_only: boolean;
+  imageUrl?: string | null;
   correct_options: { option_id: string }[] | { option_id: string } | null;
 };
 
@@ -24,6 +28,7 @@ type StoredQuestion = {
   position: number;
   points: number;
   explanation: string | null;
+  image_path: string | null;
   options: AnswerOption[];
 };
 
@@ -153,7 +158,7 @@ submissionResultRouter.get("/:submissionId/result", async (req, res) => {
   const { data: storedQuestions, error: questionsError } = await supabaseAdmin
     .from("questions")
     .select(
-      "id,text,position,points,explanation,options(id,text,position,correct_options(option_id))",
+      "id,text,position,points,explanation,image_path,options(id,text,position,image_path,image_only,correct_options(option_id))",
     )
     .eq("test_id", test.id)
     .order("position", { ascending: true });
@@ -162,6 +167,14 @@ submissionResultRouter.get("/:submissionId/result", async (req, res) => {
     return;
   }
   const questions = (storedQuestions ?? []) as StoredQuestion[];
+  let questionsWithImages;
+  try {
+    questionsWithImages = await withSignedQuestionImages(questions);
+  } catch (error) {
+    failDatabase(res, error);
+    return;
+  }
+  const imageUrls = new Map(questionsWithImages.map((q) => [q.id, q]));
 
   // Each option in submission_answers belongs to the already authorized
   // submission. Read in pages to support large tests (up to 100*12 choices).
@@ -224,8 +237,23 @@ submissionResultRouter.get("/:submissionId/result", async (req, res) => {
       status,
       points: question.points,
       earnedPoints: correctSelection ? question.points : 0,
-      selectedOptions: selected.map(({ id, text }) => ({ id, text })),
-      correctOptions: correct.map(({ id, text }) => ({ id, text })),
+      imageUrl: imageUrls.get(question.id)?.imageUrl ?? null,
+      selectedOptions: selected.map(({ id, text, image_only }) => ({
+        id,
+        text,
+        imageOnly: image_only,
+        imageUrl:
+          imageUrls.get(question.id)?.options?.find((o) => o.id === id)
+            ?.imageUrl ?? null,
+      })),
+      correctOptions: correct.map(({ id, text, image_only }) => ({
+        id,
+        text,
+        imageOnly: image_only,
+        imageUrl:
+          imageUrls.get(question.id)?.options?.find((o) => o.id === id)
+            ?.imageUrl ?? null,
+      })),
       explanation: question.explanation,
     };
   });

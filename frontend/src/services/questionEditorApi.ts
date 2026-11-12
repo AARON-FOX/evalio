@@ -9,6 +9,10 @@ export interface EditableOption {
   text: string;
   position: number;
   isCorrect: boolean;
+  image_path: string | null;
+  image_only: boolean;
+  imageOnly?: boolean;
+  imageUrl: string | null;
 }
 
 export interface EditableQuestion {
@@ -18,6 +22,8 @@ export interface EditableQuestion {
   position: number;
   points: number;
   explanation: string | null;
+  image_path: string | null;
+  imageUrl: string | null;
   options: EditableOption[];
 }
 

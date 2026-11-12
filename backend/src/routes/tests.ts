@@ -8,6 +8,10 @@ import {
   requireRespondent,
 } from "../middleware/requireAuth.js";
 import { submitTestSchema } from "../schemas/submissionSchemas.js";
+import {
+  verifyImageReferences,
+  withSignedQuestionImages,
+} from "../lib/testMedia.js";
 
 import {
   createTestSchema,
@@ -179,10 +183,14 @@ testsRouter.get("/:id", async (req, res) => {
         text,
         question_type,
         position,
+        points,
+        image_path,
         options (
           id,
           text,
-          position
+          position,
+          image_path,
+          image_only
         )
       `,
     )
@@ -199,10 +207,14 @@ testsRouter.get("/:id", async (req, res) => {
     options: [...question.options].sort((a, b) => a.position - b.position),
   }));
 
-  res.json({
-    ...test,
-    questions: orderedQuestions,
-  });
+  try {
+    res.json({
+      ...test,
+      questions: await withSignedQuestionImages(orderedQuestions),
+    });
+  } catch (error) {
+    databaseError(res, error);
+  }
 });
 
 // ===========================================
@@ -262,7 +274,22 @@ testsRouter.post("/:id/questions", requireCreator, async (req, res) => {
     return;
   }
 
-  const { data, error } = await supabaseAdmin.rpc("evalio_add_question_v2", {
+  try {
+    await verifyImageReferences(
+      [parsed.data.imagePath, ...parsed.data.options.map((o) => o.imagePath)],
+      req.authUser!.id,
+    );
+  } catch (error) {
+    res
+      .status(400)
+      .json({
+        message: error instanceof Error ? error.message : "invalid_media",
+      });
+    return;
+  }
+
+  const { data, error } = await supabaseAdmin.rpc("evalio_add_question_media", {
+    p_image_path: parsed.data.imagePath ?? null,
     p_test_id: idResult.data,
     p_creator_id: req.authUser!.id,
     p_text: parsed.data.text,
