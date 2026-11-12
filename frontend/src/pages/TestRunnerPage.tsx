@@ -12,6 +12,7 @@ import { Alert } from "../components/ui/Alert/Alert";
 import { Button } from "../components/ui/Button/Button";
 import { Card } from "../components/ui/Card/Card";
 import { Choice } from "../components/ui/Choice/Choice";
+import { ConfirmDialog } from "../components/ui/ConfirmDialog/ConfirmDialog";
 import {
   useStartRunnerAttemptMutation,
   useLazyGetRunnerAttemptQuery,
@@ -45,6 +46,7 @@ export function TestRunnerPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [finishing, setFinishing] = useState(false);
+  const [showFinishDialog, setShowFinishDialog] = useState(false);
   const [error, setError] = useState("");
   const saveLock = useRef(false);
   const finishLock = useRef(false);
@@ -94,6 +96,7 @@ export function TestRunnerPage() {
     )
       return;
     finishLock.current = true;
+    setShowFinishDialog(false);
     setFinishing(true);
     setError("");
     try {
@@ -164,12 +167,7 @@ export function TestRunnerPage() {
   }
 
   function confirmFinish() {
-    const missing = questions.length - answeredCount;
-    const message =
-      missing > 0
-        ? `Залишилося ${missing} запитань без відповіді. Завершити тест?`
-        : "Завершити тест? Після цього відповіді змінити не можна.";
-    if (window.confirm(message)) void finish();
+    setShowFinishDialog(true);
   }
 
   if (loading)
@@ -450,6 +448,19 @@ export function TestRunnerPage() {
           Після закінчення часу сервер завершить спробу при наступному запиті.
         </footer>
       </main>
+      <ConfirmDialog
+        open={showFinishDialog}
+        title="Завершити тест?"
+        description={
+          questions.length - answeredCount > 0
+            ? `Залишилося ${questions.length - answeredCount} запитань без відповіді. Незавершені питання отримають 0 балів. Після завершення змінити відповіді буде неможливо.`
+            : "Після завершення змінити відповіді буде неможливо. Підтвердити завершення тесту?"
+        }
+        confirmLabel="Завершити тест"
+        busy={saving || finishing}
+        onConfirm={() => void finish()}
+        onCancel={() => setShowFinishDialog(false)}
+      />
     </div>
   );
 }
