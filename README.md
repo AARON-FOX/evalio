@@ -108,7 +108,7 @@ cd evalio
 
 ### 2. Backend
 
-Створи `backend/.env`:
+Створити `backend/.env`:
 
 ```dotenv
 PORT=3001
@@ -118,7 +118,7 @@ SUPABASE_PUBLISHABLE_KEY=YOUR_SUPABASE_PUBLISHABLE_KEY
 SUPABASE_SECRET_KEY=YOUR_SUPABASE_SECRET_KEY
 ```
 
-Запусти:
+Запустити:
 
 ```bash
 cd backend
@@ -130,7 +130,7 @@ API доступний на `http://localhost:3001`. Перевірка: `http:/
 
 ### 3. Frontend
 
-В іншому терміналі створи `frontend/.env.local`:
+В іншому терміналі створити `frontend/.env.local`:
 
 ```dotenv
 VITE_API_URL=http://localhost:3001
@@ -138,7 +138,7 @@ VITE_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=YOUR_SUPABASE_PUBLISHABLE_KEY
 ```
 
-Запусти:
+Запустити:
 
 ```bash
 cd frontend
@@ -146,9 +146,9 @@ npm ci
 npm run dev
 ```
 
-Відкрий `http://localhost:5173`.
+Відкрити `http://localhost:5173`.
 
-> **Безпека:** `SUPABASE_SECRET_KEY` використовується **лише на backend**. Ніколи не додавай його у змінні `VITE_*`, React-код, Git-коміти або README. Файли `.env` та `.env.local` не повинні потрапляти до репозиторію.
+> **Безпека:** `SUPABASE_SECRET_KEY` використовується **лише на backend**. Ніколи не додавате його у змінні `VITE_*`, React-код, Git-коміти або README. Файли `.env` та `.env.local` не повинні потрапляти до репозиторію.
 
 ## Основні API-маршрути
 
