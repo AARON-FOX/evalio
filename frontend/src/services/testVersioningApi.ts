@@ -48,7 +48,13 @@ export interface WeightedQuestionInput {
   questionType: "single_choice" | "multiple_choice";
   points: number;
   explanation: string | null;
-  options: { text: string; isCorrect: boolean }[];
+  imagePath?: string | null;
+  options: {
+    text: string;
+    isCorrect: boolean;
+    imagePath?: string | null;
+    imageOnly?: boolean;
+  }[];
 }
 
 async function request<T>(

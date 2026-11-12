@@ -1,5 +1,6 @@
 import { Router, type Response } from "express";
 import { z } from "zod";
+import { withSignedQuestionImages } from "../lib/testMedia.js";
 
 import { supabaseAdmin } from "../lib/supabaseAdmin.js";
 import { requireAuth, requireRespondent } from "../middleware/requireAuth.js";
@@ -15,13 +16,20 @@ const saveSchema = z.strictObject({
 });
 
 type ApiError = { message: string };
-type QuestionOption = { id: string; text: string; position: number };
+type QuestionOption = {
+  id: string;
+  text: string;
+  position: number;
+  image_path: string | null;
+  image_only: boolean;
+};
 type Question = {
   id: string;
   text: string;
   question_type: "single_choice" | "multiple_choice";
   position: number;
   points: number;
+  image_path: string | null;
   options: QuestionOption[];
 };
 
@@ -210,7 +218,9 @@ activeAttemptsRouter.get("/:id", async (req, res) => {
 
   const { data: questions, error: questionsError } = await supabaseAdmin
     .from("questions")
-    .select("id,text,question_type,position,points,options(id,text,position)")
+    .select(
+      "id,text,question_type,position,points,image_path,options(id,text,position,image_path,image_only)",
+    )
     .eq("test_id", test.id);
   if (questionsError) {
     dbError(res, questionsError);
@@ -225,11 +235,25 @@ activeAttemptsRouter.get("/:id", async (req, res) => {
       text: q.text,
       questionType: q.question_type,
       points: q.points,
+      image_path: q.image_path,
       options: [...q.options]
         .sort((a, b) => a.position - b.position)
-        .map(({ id, text }) => ({ id, text })),
+        .map(({ id, text, image_path, image_only }) => ({
+          id,
+          text,
+          image_path,
+          image_only,
+        })),
     }))
     .sort((a, b) => (orderMap.get(a.id) ?? 999) - (orderMap.get(b.id) ?? 999));
+
+  let questionsWithImages;
+  try {
+    questionsWithImages = await withSignedQuestionImages(safeQuestions);
+  } catch (error) {
+    dbError(res, error);
+    return;
+  }
 
   res.json({
     id: attempt.id,
@@ -244,7 +268,7 @@ activeAttemptsRouter.get("/:id", async (req, res) => {
     expiresAt: attempt.expires_at,
     serverNow: new Date().toISOString(),
     answers: attempt.answers,
-    questions: safeQuestions,
+    questions: questionsWithImages,
   });
 });
 

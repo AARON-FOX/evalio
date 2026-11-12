@@ -1,4 +1,5 @@
 import { useId } from "react";
+import type { ReactNode } from "react";
 
 import type { InputHTMLAttributes } from "react";
 
@@ -9,7 +10,7 @@ interface ChoiceProps extends Omit<
   "type"
 > {
   type: "radio" | "checkbox";
-  label: string;
+  label: ReactNode;
   description?: string;
 }
 

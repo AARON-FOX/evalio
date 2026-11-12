@@ -17,7 +17,12 @@ export const updateTestSchema = z
     message: "At least one field is required",
   });
 
+const imagePath = z.string().max(255).regex(
+  /^[a-f\d-]{36}\/[a-f\d-]{36}\/[a-f\d-]{36}\.(jpg|jpeg|png|webp|gif)$/i,
+).nullable().optional();
+
 export const addQuestionSchema = z.strictObject({
+  imagePath,
   text: z.string().trim().min(1).max(5000),
   questionType: z.enum(["single_choice", "multiple_choice"]),
   options: z
@@ -25,6 +30,8 @@ export const addQuestionSchema = z.strictObject({
       z.strictObject({
         text: z.string().trim().min(1).max(1000),
         isCorrect: z.boolean(),
+        imagePath,
+        imageOnly: z.boolean().optional(),
       }),
     )
     .min(2)

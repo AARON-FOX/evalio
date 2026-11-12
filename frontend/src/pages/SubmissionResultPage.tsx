@@ -83,6 +83,13 @@ function AnswerReview({
       <h3>
         {index + 1}. {question.text}
       </h3>
+      {question.imageUrl && (
+        <img
+          className={styles.questionImage}
+          src={question.imageUrl}
+          alt={`Ілюстрація до питання: ${question.text}`}
+        />
+      )}
 
       {question.selectedOptions.length > 0 ? (
         <div
@@ -95,7 +102,16 @@ function AnswerReview({
             {positive ? <Check size={14} /> : <X size={14} />} ВАША ВІДПОВІДЬ
           </span>
           {question.selectedOptions.map((answer) => (
-            <p key={answer.id}>{answer.text}</p>
+            <div className={styles.reviewAnswer} key={answer.id}>
+              {!answer.imageOnly && <p>{answer.text}</p>}
+              {answer.imageUrl && (
+                <img
+                  className={styles.optionImage}
+                  src={answer.imageUrl}
+                  alt={`Обраний варіант: ${answer.text}`}
+                />
+              )}
+            </div>
           ))}
         </div>
       ) : (
@@ -111,7 +127,16 @@ function AnswerReview({
             <Check size={14} /> ПРАВИЛЬНА ВІДПОВІДЬ
           </span>
           {question.correctOptions.map((answer) => (
-            <p key={answer.id}>{answer.text}</p>
+            <div className={styles.reviewAnswer} key={answer.id}>
+              {!answer.imageOnly && <p>{answer.text}</p>}
+              {answer.imageUrl && (
+                <img
+                  className={styles.optionImage}
+                  src={answer.imageUrl}
+                  alt={`Правильний варіант: ${answer.text}`}
+                />
+              )}
+            </div>
           ))}
         </div>
       )}

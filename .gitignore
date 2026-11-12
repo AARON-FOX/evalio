@@ -154,3 +154,6 @@ vite.config.ts.timestamp-*
 /backend/.env
 /backend/.env.*
 !/backend/.env.example
+
+# Docs
+/docs

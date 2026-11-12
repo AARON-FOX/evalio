@@ -7,11 +7,14 @@ export type QuestionOutcome = "correct" | "incorrect" | "unanswered";
 export interface AnswerSummary {
   id: string;
   text: string;
+  imageUrl?: string | null;
+  imageOnly?: boolean;
 }
 
 export interface ReviewedQuestion {
   id: string;
   text: string;
+  imageUrl?: string | null;
   status: QuestionOutcome;
   points: number;
   earnedPoints: number;
