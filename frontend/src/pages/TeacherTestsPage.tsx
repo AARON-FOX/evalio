@@ -1,21 +1,51 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { ArrowRight, FilePlus2, FileText, PencilLine } from "lucide-react";
+import {
+  ArrowRight,
+  FilePlus2,
+  FileText,
+  PencilLine,
+  Trash2,
+} from "lucide-react";
 
 import { Card } from "../components/ui/Card/Card";
 import { Button } from "../components/ui/Button/Button";
 import { Alert } from "../components/ui/Alert/Alert";
-import { useGetTeacherTestsQuery } from "../app/evalioApi";
+import { ConfirmDialog } from "../components/ui/ConfirmDialog/ConfirmDialog";
+import {
+  useGetTeacherTestsQuery,
+  useDeleteTestMutation,
+} from "../app/evalioApi";
 import { queryErrorMessage } from "../app/queryError";
 import styles from "./TeacherTestsPage.module.scss";
 
 export function TeacherTestsPage() {
   const [page, setPage] = useState(1);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
+  const [actionError, setActionError] = useState("");
+  const [deleteTest, { isLoading: deleting }] = useDeleteTestMutation();
+
   const { data, isLoading, error: queryError } = useGetTeacherTestsQuery(page);
   const error = queryError ? queryErrorMessage(queryError) : "";
   const totalPages = data
     ? Math.max(1, Math.ceil(data.total / data.pageSize))
     : 1;
+
+  async function confirmDelete() {
+    if (!deleteTarget || deleting) return;
+    setActionError("");
+    try {
+      await deleteTest(deleteTarget.id).unwrap();
+      setDeleteTarget(null);
+      if (data?.items.length === 1 && page > 1) setPage(page - 1);
+    } catch (error) {
+      setDeleteTarget(null);
+      setActionError(queryErrorMessage(error));
+    }
+  }
 
   return (
     <section className={styles.page}>
@@ -30,6 +60,11 @@ export function TeacherTestsPage() {
         </Link>
       </div>
 
+      {actionError && (
+        <Alert tone="error" title="Не вдалося видалити тест">
+          {actionError}
+        </Alert>
+      )}
       {isLoading && <p role="status">Завантажуємо тести…</p>}
       {error && (
         <Alert tone="error" title="Не вдалося завантажити тести">
@@ -67,17 +102,30 @@ export function TeacherTestsPage() {
               >
                 {test.status === "draft" ? "Чернетка" : "Опубліковано"}
               </span>
-              <Link
-                className={styles.editLink}
-                to={`/teacher/tests/${test.id}/edit`}
-              >
-                {test.status === "draft" ? (
-                  <PencilLine size={17} aria-hidden="true" />
-                ) : (
-                  <ArrowRight size={17} aria-hidden="true" />
-                )}
-                {test.status === "draft" ? "Редагувати" : "Переглянути"}
-              </Link>
+              <div className={styles.rowActions}>
+                <Link
+                  className={styles.editLink}
+                  to={`/teacher/tests/${test.id}/edit`}
+                >
+                  {test.status === "draft" ? (
+                    <PencilLine size={17} aria-hidden="true" />
+                  ) : (
+                    <ArrowRight size={17} aria-hidden="true" />
+                  )}
+                  {test.status === "draft" ? "Редагувати" : "Переглянути"}
+                </Link>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  disabled={deleting}
+                  onClick={() => {
+                    setActionError("");
+                    setDeleteTarget({ id: test.id, title: test.title });
+                  }}
+                >
+                  <Trash2 size={16} aria-hidden="true" /> Видалити
+                </Button>
+              </div>
             </div>
           ))}
           {data.total > data.pageSize && (
@@ -103,6 +151,20 @@ export function TeacherTestsPage() {
           )}
         </Card>
       )}
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title="Видалити тест?"
+        description={
+          deleteTarget
+            ? `«${deleteTarget.title}» та всі його версії буде приховано для викладача й студентів. Історія проходжень та оцінки залишаться в базі даних. Відновлення через інтерфейс наразі не передбачено.`
+            : ""
+        }
+        confirmLabel="Видалити тест"
+        confirmVariant="danger"
+        busy={deleting}
+        onConfirm={() => void confirmDelete()}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </section>
   );
 }

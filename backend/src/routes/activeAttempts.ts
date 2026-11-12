@@ -35,6 +35,10 @@ function rpcError(res: Response, message: string) {
     respondent_required: { code: 403, text: "Потрібна роль студента." },
     test_not_available: { code: 404, text: "Тест недоступний." },
     attempt_not_found: { code: 404, text: "Спробу не знайдено." },
+    test_archived: {
+      code: 409,
+      text: "Цей тест більше недоступний для проходження.",
+    },
     test_deadline_passed: { code: 409, text: "Дедлайн тесту минув." },
     attempt_limit_reached: { code: 409, text: "Ліміт спроб вичерпано." },
     attempt_finished: { code: 409, text: "Цю спробу вже завершено." },
@@ -58,11 +62,12 @@ function rpcError(res: Response, message: string) {
   };
   for (const [key, value] of Object.entries(known)) {
     if (message.includes(key)) {
-      res
-        .status(value.code)
-        .json({ message: value.text, code: key } satisfies ApiError & {
-          code: string;
-        });
+      res.status(value.code).json({
+        message: value.text,
+        code: key,
+      } satisfies ApiError & {
+        code: string;
+      });
       return;
     }
   }
