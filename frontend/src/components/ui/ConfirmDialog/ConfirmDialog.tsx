@@ -9,6 +9,7 @@ type ConfirmDialogProps = {
   title: string;
   description: string;
   confirmLabel: string;
+  confirmVariant?: "primary" | "danger";
   busy?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
@@ -19,6 +20,7 @@ export function ConfirmDialog({
   title,
   description,
   confirmLabel,
+  confirmVariant = "primary",
   busy = false,
   onConfirm,
   onCancel,
@@ -69,6 +71,7 @@ export function ConfirmDialog({
           </Button>
           <Button
             type="button"
+            variant={confirmVariant}
             loading={busy}
             disabled={busy}
             onClick={onConfirm}

@@ -68,7 +68,7 @@
 .testRow {
   padding: 20px 24px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 140px 135px;
+  grid-template-columns: minmax(0, 1fr) 140px auto;
   gap: 20px;
   align-items: center;
   border-bottom: 1px solid var(--color-border);
@@ -103,6 +103,14 @@
 .published {
   background: var(--color-success-bg);
   color: var(--color-success-text);
+}
+.rowActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
 }
 .editLink {
   display: inline-flex;
@@ -178,6 +186,14 @@
   .draft,
   .published {
     grid-column: 1;
+  }
+  .rowActions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+    min-width: 0;
   }
   .editLink {
     grid-column: 2;

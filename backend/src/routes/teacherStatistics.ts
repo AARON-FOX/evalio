@@ -31,7 +31,7 @@ teacherStatisticsRouter.get("/tests", async (req, res) => {
   const from = (page - 1) * pageSize;
 
   const { data, count, error } = await supabaseAdmin
-    .from("tests")
+    .from("evalio_unarchived_tests")
     .select("id, title, kind, status, created_at", { count: "exact" })
     .eq("creator_id", req.authUser!.id)
     .or("status.eq.draft,is_current.eq.true")

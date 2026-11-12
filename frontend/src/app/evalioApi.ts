@@ -154,6 +154,30 @@ export const evalioApi = createApi({
       invalidatesTags: (_result, error) =>
         error ? [] : ["TeacherTests", "TeacherDashboard"],
     }),
+    deleteTest: builder.mutation<
+      { seriesId: string; archivedAt: string; message: string },
+      string
+    >({
+      query: (id) => ({
+        url: `/api/tests/${encodeURIComponent(id)}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_result, error) =>
+        error
+          ? []
+          : [
+              "TeacherTests",
+              "TeacherDashboard",
+              "Catalog",
+              "StudentDashboard",
+              "TeacherStatistics",
+              "TestVersions",
+              "TestSettings",
+              "TestEditor",
+              "TestDetails",
+              "TestOverview",
+            ],
+    }),
     publishTest: builder.mutation<
       { id: string; status: "published"; message: string },
       string
@@ -348,6 +372,7 @@ export const {
   useGetMySubmissionsQuery,
   useGetSubmissionDetailQuery,
   useCreateTestMutation,
+  useDeleteTestMutation,
   usePublishTestMutation,
   useGetTestStatisticsQuery,
   useGetTeacherSubmissionDetailsQuery,

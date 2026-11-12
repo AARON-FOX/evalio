@@ -78,7 +78,7 @@ testsRouter.get("/", async (req, res) => {
   const userId = req.authUser!.id;
 
   const { data, error } = await supabaseAdmin
-    .from("tests")
+    .from("evalio_unarchived_tests")
     .select(testFields)
     .or(
       `and(status.eq.published,is_current.eq.true),and(status.eq.draft,creator_id.eq.${userId})`,
