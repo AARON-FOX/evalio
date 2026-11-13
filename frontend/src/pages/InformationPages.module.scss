@@ -95,15 +95,6 @@
 .full {
   grid-column: 1 / -1;
 }
-.note {
-  background: var(--color-surface-muted);
-  padding: 15px 20px;
-  border-radius: var(--radius-md);
-  color: var(--color-secondary);
-  font-size: 13px;
-  line-height: 1.6;
-  margin-top: 20px;
-}
 .links {
   display: flex;
   gap: 12px;
